@@ -1,4 +1,5 @@
 using AutoSchoolProject.Data;
+using AutoSchoolProject.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,10 +17,11 @@ namespace AutoSchoolProject
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>{options.SignIn.RequireConfirmedAccount = true;})
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
             builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
 
             var app = builder.Build();
 
@@ -46,13 +48,16 @@ namespace AutoSchoolProject
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
+
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 await db.Database.MigrateAsync();
+
+                await IdentitySeed.SeedAsync(app.Services);
+                await CoursesSeed.SeedAsync(app.Services);
+                await DemoDataSeed.SeedAsync(app.Services);
             }
-            //await IdentitySeed.SeedAsync(app.Services); 
-            await AutoSchoolProject.Data.IdentitySeed.SeedAsync(app.Services);
 
             app.Run();
         }
