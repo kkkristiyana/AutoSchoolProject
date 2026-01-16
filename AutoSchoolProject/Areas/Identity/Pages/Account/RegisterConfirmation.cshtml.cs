@@ -1,10 +1,9 @@
+using System.Text;
+using System.Threading.Tasks;
 using AutoSchoolProject.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoSchoolProject.Areas.Identity.Pages.Account
 {
@@ -22,7 +21,7 @@ namespace AutoSchoolProject.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnGetAsync(string userId, string code, string returnUrl = null)
         {
-            if (userId == null || code == null)
+            if (userId == null)
             {
                 return RedirectToPage("/Index");
             }
@@ -33,12 +32,10 @@ namespace AutoSchoolProject.Areas.Identity.Pages.Account
                 return NotFound($"Unable to load user with ID '{userId}'.");
             }
 
-            var decodedCode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            var result = await _userManager.ConfirmEmailAsync(user, decodedCode);
-
-            if (!result.Succeeded)
+            if (!user.EmailConfirmed)
             {
-                TempData["ErrorMessage"] = "Email confirmation failed. Try again.";
+                user.EmailConfirmed = true;
+                await _userManager.UpdateAsync(user);
             }
 
             Email = user.Email;
