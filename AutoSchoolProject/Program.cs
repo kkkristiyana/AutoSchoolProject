@@ -1,6 +1,8 @@
 using AutoSchoolProject.Data;
 using AutoSchoolProject.Models;
+using AutoSchoolProject.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoSchoolProject
@@ -15,11 +17,17 @@ namespace AutoSchoolProject
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>{options.SignIn.RequireConfirmedAccount = true;})
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = true;
+            })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+            builder.Services.AddScoped<IEmailSender, DummyEmailSender>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 
@@ -42,6 +50,7 @@ namespace AutoSchoolProject
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

@@ -23,15 +23,15 @@ namespace AutoSchoolProject.Data
 
             builder.Entity<Course>()
                 .Property(c => c.Price)
-                .HasPrecision(18, 2); // 18 цифри общо, 2 след десетичната запетая
+                .HasPrecision(18, 2); //18 цифри общо,2 след запетаята
 
-            // Връзка между ApplicationUser и Instructor
+            //Връзка между ApplicationUser и Instructor
             builder.Entity<Instructor>()
                 .HasOne(i => i.User)
                 .WithOne(u => u.Instructor)
                 .HasForeignKey<Instructor>(i => i.UserId);
 
-            // Връзка между ApplicationUser и Student
+            //Връзка между ApplicationUser и Student
             builder.Entity<Student>()
                 .HasOne(s => s.User)
                 .WithOne(u => u.Student)

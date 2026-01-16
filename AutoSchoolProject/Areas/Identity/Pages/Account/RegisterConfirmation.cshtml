@@ -1,0 +1,22 @@
+﻿@page
+@model AutoSchoolProject.Areas.Identity.Pages.Account.RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Confirm your email";
+}
+
+<h2>Email Confirmed!</h2>
+
+<p>
+    Thank you, <strong>@Model.Email</strong>! Your email has been successfully confirmed.
+</p>
+
+<p>
+    You can now <a asp-page="/Account/Login">login</a> to your account.
+</p>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
