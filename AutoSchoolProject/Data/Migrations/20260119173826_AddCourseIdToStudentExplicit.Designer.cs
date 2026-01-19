@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoSchoolProject.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260119130130_TestMigration")]
-    partial class TestMigration
+    [Migration("20260119173826_AddCourseIdToStudentExplicit")]
+    partial class AddCourseIdToStudentExplicit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -389,7 +389,7 @@ namespace AutoSchoolProject.Data.Migrations
 
             modelBuilder.Entity("AutoSchoolProject.Models.Student", b =>
                 {
-                    b.HasOne("AutoSchoolProject.Models.Course", null)
+                    b.HasOne("AutoSchoolProject.Models.Course", "Course")
                         .WithMany("Students")
                         .HasForeignKey("CourseId");
 
@@ -398,6 +398,8 @@ namespace AutoSchoolProject.Data.Migrations
                         .HasForeignKey("AutoSchoolProject.Models.Student", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("User");
                 });

@@ -1,4 +1,5 @@
 ﻿using AutoSchoolProject.Models;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace AutoSchoolProject.Data
@@ -11,38 +12,55 @@ namespace AutoSchoolProject.Data
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             var instructors = context.Instructors.ToList();
-            var students = new List<(Student studentEntity, ApplicationUser user)>();
+            var students = context.Students
+            .Include(s => s.User)
+            .ToList();
+
+            var courses = context.Courses.ToList();
+            // Assign courses
+            foreach (var student in students)
+            {
+                student.CourseId = courses.First().Id;
+            }
 
             // PracticeLessons
-            int lessonNumber = 1;
-
-            foreach (var (studentEntity, user) in students)
+            if (!context.PracticeLessons.Any())
             {
-                foreach (var instructor in instructors.Take(2))
-                {
-                    context.PracticeLessons.Add(new PracticeLesson
-                    {
-                        StudentId = studentEntity.Id,
-                        InstructorId = instructor.Id,
-                        DateTime = DateTime.Today.AddDays(lessonNumber),
-                        Completed = false,
-                        Note = $"Урок {lessonNumber} за {user.FirstName}"
-                    });
+                int lessonNumber = 1;
 
-                    lessonNumber++;
+                foreach (var student in students)
+                {
+                    foreach (var instructor in instructors.Take(2))
+                    {
+                        context.PracticeLessons.Add(new PracticeLesson
+                        {
+                            StudentId = student.Id,
+                            InstructorId = instructor.Id,
+                            DateTime = DateTime.Today.AddDays(lessonNumber),
+                            Completed = false,
+                            Note = $"Урок {lessonNumber} за {student.User.FirstName}"
+                        });
+
+                        lessonNumber++;
+                    }
                 }
             }
-            // TestResultListovki
-            var rand = new Random();
 
-            foreach (var (studentEntity, user) in students)
+
+            // TestResultListovki
+            if (!context.TestResultListovki.Any())
             {
-                context.TestResultListovki.Add(new TestResultListovki
+                var rand = new Random();
+
+                foreach (var student in students)
                 {
-                    StudentId = studentEntity.Id,
-                    Score = rand.Next(60, 100),
-                    Date = DateTime.Today.AddDays(-rand.Next(1, 15))
-                });
+                    context.TestResultListovki.Add(new TestResultListovki
+                    {
+                        StudentId = student.Id,
+                        Score = rand.Next(60, 97),
+                        Date = DateTime.Today.AddDays(-rand.Next(1, 15))
+                    });
+                }
             }
 
             await context.SaveChangesAsync();

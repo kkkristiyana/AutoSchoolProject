@@ -386,7 +386,7 @@ namespace AutoSchoolProject.Data.Migrations
 
             modelBuilder.Entity("AutoSchoolProject.Models.Student", b =>
                 {
-                    b.HasOne("AutoSchoolProject.Models.Course", null)
+                    b.HasOne("AutoSchoolProject.Models.Course", "Course")
                         .WithMany("Students")
                         .HasForeignKey("CourseId");
 
@@ -395,6 +395,8 @@ namespace AutoSchoolProject.Data.Migrations
                         .HasForeignKey("AutoSchoolProject.Models.Student", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("User");
                 });

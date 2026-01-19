@@ -5,7 +5,7 @@
 namespace AutoSchoolProject.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class TestMigration : Migration
+    public partial class AddCourseIdToStudentExplicit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
