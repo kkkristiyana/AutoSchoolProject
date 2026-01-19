@@ -6,7 +6,7 @@
         public string Name { get; set; }     
         public decimal Price { get; set; }
 
-        public ICollection<PracticeLesson> PracticeLessons { get; set; }
-        public ICollection<Student> Students { get; set; }
+        public ICollection<PracticeLesson>? PracticeLessons { get; set; }
+        public ICollection<Student>? Students { get; set; }
     }
 }
