@@ -1,0 +1,36 @@
+﻿@model AutoSchoolProject.ViewModels.Student.StudentProfileViewModel
+
+@{
+    ViewData["Title"] = "Моят профил";
+}
+
+<h2 class="mb-4">Моят профил</h2>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">@Model.FullName</h5>
+
+        <p><strong>Email:</strong> @Model.Email</p>
+        <p><strong>Телефон:</strong> @Model.PhoneNumber</p>
+        <p><strong>Курс:</strong> @Model.CourseName</p>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">Напредък</h5>
+
+        <p>Проведени часове: <strong>@Model.CompletedLessons</strong></p>
+        <p>Оставащи часове: <strong>@Model.RemainingLessons</strong></p>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="EditProfile" class="btn btn-primary">
+        ✏️ Редактирай профила
+    </a>
+
+    <a asp-action="BookLesson" class="btn btn-success ms-2">
+        📅 Запази час
+    </a>
+</div>

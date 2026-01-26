@@ -1,6 +1,7 @@
 using AutoSchoolProject.Data;
 using AutoSchoolProject.Models;
 using AutoSchoolProject.Services;
+using AutoSchoolProject.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace AutoSchoolProject
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
+           
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -28,6 +30,8 @@ namespace AutoSchoolProject
             .AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IEmailSender, DummyEmailSender>();
+            builder.Services.AddScoped<StudentService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 

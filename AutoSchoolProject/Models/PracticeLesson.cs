@@ -1,4 +1,6 @@
-﻿namespace AutoSchoolProject.Models
+﻿using AutoSchoolProject.Models.Enums;
+
+namespace AutoSchoolProject.Models
 {
     public class PracticeLesson
     {
@@ -16,5 +18,6 @@
 
         public bool Completed { get; set; }
         public string Note { get; set; }
+        public LessonStatus Status { get; set; }
     }
 }
