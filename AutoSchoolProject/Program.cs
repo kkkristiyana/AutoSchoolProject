@@ -32,6 +32,7 @@ namespace AutoSchoolProject
             builder.Services.AddScoped<IEmailSender, DummyEmailSender>();
             builder.Services.AddScoped<StudentService>();
             builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<InstructorService>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 

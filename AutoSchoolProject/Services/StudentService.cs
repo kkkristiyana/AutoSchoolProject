@@ -46,7 +46,7 @@ namespace AutoSchoolProject.Services
             };
         }
 
-        public async Task UpdateProfileAsync(ClaimsPrincipal user,EditStudentProfileViewModel model)
+        public async Task UpdateProfileAsync(ClaimsPrincipal user, EditStudentProfileViewModel model)
         {
             var student = await GetStudentAsync(user);
 
@@ -75,6 +75,17 @@ namespace AutoSchoolProject.Services
                 Status = LessonStatus.Pending
             };
 
+            var duration = 50;
+
+            bool overlaps = await _context.PracticeLessons.AnyAsync(l =>
+                l.InstructorId == model.InstructorId &&
+                l.Status != LessonStatus.Cancelled &&
+                l.Status != LessonStatus.Rejected &&
+                l.DateTime < model.DateTime.AddMinutes(duration) &&
+                model.DateTime < l.DateTime.AddMinutes(l.DurationMinutes));
+
+            if (overlaps) throw new InvalidOperationException("Този час вече е зает.");
+
             _context.PracticeLessons.Add(lesson);
             await _context.SaveChangesAsync();
         }
@@ -82,6 +93,7 @@ namespace AutoSchoolProject.Services
         {
             return await _context.Instructors
                 .Include(i => i.User)
+                .Include(i => i.Course)
                 .Select(i => new InstructorListViewModel
                 {
                     Id = i.Id,
@@ -121,7 +133,15 @@ namespace AutoSchoolProject.Services
                 CourseId = student.CourseId
             };
         }
-
+        public async Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId, DateTime start, DateTime end)
+        {
+            return await _context.PracticeLessons
+                .Where(l => l.InstructorId == instructorId
+                    && l.DateTime >= start && l.DateTime <= end
+                    && l.Status != LessonStatus.Cancelled
+                    && l.Status != LessonStatus.Rejected)
+                .ToListAsync();
+        }
         public async Task<EditStudentProfileViewModel> GetEditProfileAsync(ClaimsPrincipal user)
         {
             var student = await GetStudentAsync(user);

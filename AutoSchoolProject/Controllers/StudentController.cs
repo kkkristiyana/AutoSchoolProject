@@ -65,4 +65,19 @@ public class StudentController : Controller
         await _studentService.BookLessonAsync(User, model);
         return RedirectToAction(nameof(Profile));
     }
+    [HttpGet]
+    public async Task<IActionResult> InstructorSchedule(int instructorId, DateTime start, DateTime end)
+    {
+        var lessons = await _studentService.GetInstructorLessonsAsync(instructorId, start, end);
+
+        var events = lessons.Select(l => new
+        {
+            id = l.Id,
+            title = l.Status == AutoSchoolProject.Models.Enums.LessonStatus.Pending ? "Заявка" : "Заето",
+            start = l.DateTime,
+            end = l.DateTime.AddMinutes(l.DurationMinutes)
+        });
+
+        return Json(events);
+    }
 }
