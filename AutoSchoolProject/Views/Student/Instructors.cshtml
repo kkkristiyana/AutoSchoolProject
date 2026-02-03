@@ -1,0 +1,47 @@
+﻿@model List<AutoSchoolProject.ViewModels.Student.InstructorListViewModel>
+
+@{
+    ViewData["Title"] = "Инструктори";
+}
+
+<h2 class="mb-3">Инструктори</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Няма налични инструктори.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Име</th>
+                <th>Категория</th>
+                <th>Телефон</th>
+                <th>Имейл</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in Model)
+            {
+                <tr>
+                    <td>@i.FullName</td>
+                    <td>@i.CourseName</td>
+                    <td>@i.PhoneNumber</td>
+                    <td>@i.Email</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                           asp-controller="Student" asp-action="InstructorDetails" asp-route-id="@i.Id">
+                            Детайли
+                        </a>
+                        <a class="btn btn-sm btn-success"
+                           asp-controller="Student" asp-action="BookLesson" asp-route-instructorId="@i.Id">
+                            Запази час
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -80,4 +80,9 @@ public class StudentController : Controller
 
         return Json(events);
     }
+    public async Task<IActionResult> MyLessons()
+    {
+        var model = await _studentService.GetMyLessonsAsync(User);
+        return View(model);
+    }
 }

@@ -19,7 +19,7 @@ namespace AutoSchoolProject
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-           
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -57,6 +57,10 @@ namespace AutoSchoolProject
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            /*app.MapControllerRoute(
+            name: "areas",
+            pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");*/
 
             app.MapControllerRoute(
                 name: "default",

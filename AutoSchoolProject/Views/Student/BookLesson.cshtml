@@ -1,0 +1,32 @@
+﻿@model AutoSchoolProject.ViewModels.Student.BookLessonViewModel
+
+@{
+    ViewData["Title"] = "Запази час";
+}
+
+<h2 class="mb-3">Запази час</h2>
+
+<div class="card">
+    <div class="card-body">
+        <p class="mb-3"><strong>Инструктор:</strong> @Model.InstructorName</p>
+
+        <form asp-controller="Student" asp-action="BookLesson" method="post">
+            <input type="hidden" asp-for="InstructorId" />
+            <input type="hidden" asp-for="StudentId" />
+            <input type="hidden" asp-for="CourseId" />
+
+            <div class="mb-3">
+                <label asp-for="DateTime" class="form-label">Дата и час</label>
+                <input asp-for="DateTime" class="form-control" type="datetime-local" />
+                <span asp-validation-for="DateTime" class="text-danger"></span>
+            </div>
+
+            <button class="btn btn-success" type="submit">Запази</button>
+            <a class="btn btn-outline-secondary" asp-controller="Student" asp-action="Instructors">Отказ</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -19,6 +19,6 @@ namespace AutoSchoolProject.Models
         public bool Completed { get; set; }
         public string Note { get; set; }
         public LessonStatus Status { get; set; }
-        public int DurationMinutes { get; set; } = 50;
+        public int DurationMinutes { get; set; } =50;
     }
 }

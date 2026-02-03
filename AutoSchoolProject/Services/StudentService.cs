@@ -120,15 +120,18 @@ namespace AutoSchoolProject.Services
                 SchoolName = "Autoschool Lucky-Cars EOOD"
             };
         }
-        public async Task<BookLessonViewModel> GetBookLessonAsync(
-            ClaimsPrincipal user,
-            int instructorId)
+        public async Task<BookLessonViewModel> GetBookLessonAsync(ClaimsPrincipal user, int instructorId)
         {
             var student = await GetStudentAsync(user);
+
+            var instructor = await _context.Instructors
+                .Include(i => i.User)
+                .FirstAsync(i => i.Id == instructorId);
 
             return new BookLessonViewModel
             {
                 InstructorId = instructorId,
+                InstructorName = instructor.User.FirstName + " " + instructor.User.LastName,
                 StudentId = student.Id,
                 CourseId = student.CourseId
             };
@@ -155,6 +158,26 @@ namespace AutoSchoolProject.Services
                 CourseId = (int)student.CourseId
             };
         }
+        public async Task<List<MyLessonListItemViewModel>> GetMyLessonsAsync(ClaimsPrincipal user)
+        {
+            var student = await GetStudentAsync(user);
 
+            return await _context.PracticeLessons
+                .Where(l => l.StudentId == student.Id)
+                .Include(l => l.Instructor).ThenInclude(i => i.User)
+                .Include(l => l.Course)
+                .OrderByDescending(l => l.DateTime)
+                .Select(l => new MyLessonListItemViewModel
+                {
+                    Id = l.Id,
+                    DateTime = l.DateTime,
+                    InstructorName = l.Instructor != null ? (l.Instructor.User.FirstName + " " + l.Instructor.User.LastName) : null,
+                    CourseName = l.Course != null ? l.Course.Name : null,
+                    Status = l.Status.ToString(),
+                    Completed = l.Completed,
+                    Note = l.Note
+                })
+                .ToListAsync();
+        }
     }
 }

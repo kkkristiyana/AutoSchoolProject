@@ -1,0 +1,38 @@
+﻿@model List<AutoSchoolProject.ViewModels.Student.MyLessonListItemViewModel>
+
+@{
+    ViewData["Title"] = "Моите часове";
+}
+
+<h2 class="mb-3">📅 Моите часове</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Нямаш записани часове.</div>
+}
+else
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Инструктор</th>
+                <th>Категория</th>
+                <th>Статус</th>
+                <th>Завършен</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var l in Model)
+            {
+                <tr>
+                    <td>@l.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@l.InstructorName</td>
+                    <td>@l.CourseName</td>
+                    <td>@l.Status</td>
+                    <td>@(l.Completed ? "✅" : "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -16,5 +16,6 @@ namespace AutoSchoolProject.Services.Interfaces
         Task<BookLessonViewModel> GetBookLessonAsync(ClaimsPrincipal user, int instructorId);
         Task BookLessonAsync(ClaimsPrincipal user, BookLessonViewModel model);
         Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId, DateTime start, DateTime end);
+        Task<List<MyLessonListItemViewModel>> GetMyLessonsAsync(ClaimsPrincipal user);
     }
 }
