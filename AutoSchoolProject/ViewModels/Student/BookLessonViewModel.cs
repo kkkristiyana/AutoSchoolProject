@@ -10,7 +10,7 @@ namespace AutoSchoolProject.ViewModels.Student
 
         [Required]
         [DataType(DataType.DateTime)]
-        public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; } = DateTime.Today;
         public int StudentId { get; set; }
         public int? CourseId { get; set; }
     }

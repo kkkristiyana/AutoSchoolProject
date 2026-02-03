@@ -1,0 +1,34 @@
+﻿@model List<StudentRowViewModel>
+@{
+    ViewData["Title"] = "Ученици";
+}
+
+<h2 class="mb-3">👨‍🎓 Ученици</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Име</th>
+            <th>Имейл</th>
+            <th>Телефон</th>
+            <th>Категория</th>
+            <th>Часове</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr>
+                <td>@s.FullName</td>
+                <td>@s.Email</td>
+                <td>@s.PhoneNumber</td>
+                <td>@s.CourseName</td>
+                <td>@s.LessonsCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+   class="btn btn-sm btn-outline-secondary mb-3">
+    ← Назад към Dashboard
+</a>

@@ -62,6 +62,13 @@ public class StudentController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
+        if (model.DateTime < DateTime.Now)
+        {
+            ModelState.AddModelError(nameof(model.DateTime),
+                "Не можеш да записваш час в миналото.");
+            return View(model);
+        }
+
         await _studentService.BookLessonAsync(User, model);
         return RedirectToAction(nameof(Profile));
     }

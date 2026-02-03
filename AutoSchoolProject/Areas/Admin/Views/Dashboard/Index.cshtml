@@ -1,0 +1,47 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2 class="mb-3">📊 Admin Dashboard</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card"><div class="card-body">👨‍🎓 Ученици: <strong>@Model.TotalStudents</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">🧑‍🏫 Инструктори: <strong>@Model.TotalInstructors</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">📅 Часове общо: <strong>@Model.TotalLessons</strong></div></div></div>
+
+    <div class="col-md-4"><div class="card"><div class="card-body">⏳ Pending: <strong>@Model.PendingLessons</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">✅ Approved (предстоящи): <strong>@Model.ApprovedUpcomingLessons</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">🏁 Завършени: <strong>@Model.CompletedLessons</strong></div></div></div>
+</div>
+
+<div class="d-flex gap-2 mb-3">
+    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Lessons" asp-action="Index">Часове</a>
+    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Students" asp-action="Index">Ученици</a>
+    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Instructors" asp-action="Index">Инструктори</a>
+</div>
+
+<h4 class="mt-4">Последни 10 часа</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Ученик</th>
+            <th>Инструктор</th>
+            <th>Статус</th>
+            <th>Завършен</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var l in Model.LatestLessons)
+        {
+            <tr>
+                <td>@l.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>@l.StudentName</td>
+                <td>@l.InstructorName</td>
+                <td>@l.Status</td>
+                <td>@(l.Completed ? "✅" : "—")</td>
+            </tr>
+        }
+    </tbody>
+</table>

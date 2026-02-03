@@ -6,6 +6,9 @@
 
 <h2 class="mb-3">Запази час</h2>
 
+<div asp-validation-summary="All" class="text-danger"></div>
+<span asp-validation-for="DateTime" class="text-danger"></span>
+
 <div class="card">
     <div class="card-body">
         <p class="mb-3"><strong>Инструктор:</strong> @Model.InstructorName</p>
@@ -17,7 +20,10 @@
 
             <div class="mb-3">
                 <label asp-for="DateTime" class="form-label">Дата и час</label>
-                <input asp-for="DateTime" class="form-control" type="datetime-local" />
+                <input asp-for="DateTime"
+                       type="datetime-local"
+                       class="form-control"
+                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
                 <span asp-validation-for="DateTime" class="text-danger"></span>
             </div>
 
