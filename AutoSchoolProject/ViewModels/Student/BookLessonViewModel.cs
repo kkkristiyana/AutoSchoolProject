@@ -6,7 +6,7 @@ namespace AutoSchoolProject.ViewModels.Student
     public class BookLessonViewModel
     {
         public int InstructorId { get; set; }
-        public string InstructorName { get; set; }
+        public string? InstructorName { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]

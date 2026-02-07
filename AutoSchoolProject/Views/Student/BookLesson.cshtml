@@ -11,7 +11,8 @@
 
 <div class="card">
     <div class="card-body">
-        <p class="mb-3"><strong>Инструктор:</strong> @Model.InstructorName</p>
+        <input type="hidden" asp-for="InstructorId" />
+        <h4>Инструктор: @Model.InstructorName</h4>
 
         <form asp-controller="Student" asp-action="BookLesson" method="post">
             <input type="hidden" asp-for="InstructorId" />
