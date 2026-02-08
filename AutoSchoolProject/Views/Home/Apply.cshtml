@@ -1,0 +1,50 @@
+﻿@model AutoSchoolProject.ViewModels.Public.EnrollmentRequestCreateViewModel
+
+@{
+    ViewData["Title"] = "Заявка за записване";
+}
+
+<h2 class="mb-3">📝 Заявка за записване</h2>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Apply" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label">Име и фамилия</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PhoneNumber" class="form-label">Телефон</label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CourseId" class="form-label">Категория/курс</label>
+                <select asp-for="CourseId" asp-items="Model.Courses" class="form-select">
+                    <option value="">-- избери --</option>
+                </select>
+                <span asp-validation-for="CourseId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PreferredStartDate" class="form-label">Предпочитан старт</label>
+                <input asp-for="PreferredStartDate" type="date" class="form-control" />
+                <span asp-validation-for="PreferredStartDate" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success">Изпрати</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Назад</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

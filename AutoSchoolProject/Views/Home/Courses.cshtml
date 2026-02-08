@@ -1,0 +1,30 @@
+﻿@model List<AutoSchoolProject.Models.Course>
+
+@{
+    ViewData["Title"] = "Курсове и цени";
+}
+
+<h2 class="mb-3">🚗 Курсове и цени</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Няма въведени курсове.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var c in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@c.Name</h5>
+                        <p class="card-text mb-1"><strong>Цена:</strong> @c.Price.ToString("F2") лв</p>
+                        @* <p class="card-text"><strong>Практика:</strong> @c.RequiredPracticeLessons часа</p> *@
+                        <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Apply">Заяви записване</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,7 +1,6 @@
 ﻿using AutoSchoolProject.Models;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace AutoSchoolProject.Data
 {
     public static class DemoDataSeed
@@ -28,7 +27,6 @@ namespace AutoSchoolProject.Data
                 instructors[3].CourseId = courseB.Id;
             }
 
-            // Assign courses
             var students = await context.Students.Include(s => s.User).ToListAsync();
             for (int i = 0; i < students.Count; i++)
             {
@@ -39,7 +37,25 @@ namespace AutoSchoolProject.Data
 
             await context.SaveChangesAsync();
 
-            // PracticeLessons
+            if (!context.TheorySessions.Any())
+            {
+                var baseDate = DateTime.Today.AddDays(1).Date.AddHours(18);
+
+                foreach (var c in courses)
+                {
+                    for (int i = 0; i < 6; i++)
+                    {
+                        context.TheorySessions.Add(new TheorySession
+                        {
+                            CourseId = c.Id,
+                            DateTime = baseDate.AddDays(i * 2),
+                            DurationMinutes = 90,
+                            Topic = $"Теория {i + 1} - {c.Name}",
+                            Location = "Зала 1"
+                        });
+                    }
+                }
+            }
             if (!context.PracticeLessons.Any())
             {
                 int lessonNumber = 1;
@@ -60,11 +76,45 @@ namespace AutoSchoolProject.Data
                         lessonNumber++;
                     }
                 }
+            }
+            
+            if (!context.PracticeLessons.Any(l => l.Status == Models.Enums.LessonStatus.Available))
+            {
+                var start = DateTime.Today.AddDays(1).Date.AddHours(9);
 
+                foreach (var instructor in instructors)
+                {
+                    for (int day = 0; day < 4; day++)
+                    {
+                        var d1 = start.AddDays(day);
+
+                        context.PracticeLessons.Add(new PracticeLesson
+                        {
+                            InstructorId = instructor.Id,
+                            CourseId = instructor.CourseId,
+                            StudentId = null,
+                            DateTime = d1,
+                            DurationMinutes = 50,
+                            Completed = false,
+                            Note = "Свободен слот",
+                            Status = Models.Enums.LessonStatus.Available
+                        });
+
+                        context.PracticeLessons.Add(new PracticeLesson
+                        {
+                            InstructorId = instructor.Id,
+                            CourseId = instructor.CourseId,
+                            StudentId = null,
+                            DateTime = d1.AddHours(1),
+                            DurationMinutes = 50,
+                            Completed = false,
+                            Note = "Свободен слот",
+                            Status = Models.Enums.LessonStatus.Available
+                        });
+                    }
+                }
             }
 
-
-            // TestResultListovki
             if (!context.TestResultListovki.Any())
             {
                 var rand = new Random();

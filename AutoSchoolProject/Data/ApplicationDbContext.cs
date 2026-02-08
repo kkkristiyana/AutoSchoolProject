@@ -16,6 +16,8 @@ namespace AutoSchoolProject.Data
         public DbSet<Course> Courses { get; set; }
         public DbSet<PracticeLesson> PracticeLessons { get; set; }
         public DbSet<TestResultListovki> TestResultListovki { get; set; }
+        public DbSet<EnrollmentRequest> EnrollmentRequests { get; set; }
+        public DbSet<TheorySession> TheorySessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -36,6 +38,18 @@ namespace AutoSchoolProject.Data
                 .HasOne(s => s.User)
                 .WithOne(u => u.Student)
                 .HasForeignKey<Student>(s => s.UserId);
+
+            builder.Entity<EnrollmentRequest>()
+               .HasOne(r => r.Course)
+               .WithMany()
+               .HasForeignKey(r => r.CourseId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<TheorySession>()
+                .HasOne(t => t.Course)
+                .WithMany()
+                .HasForeignKey(t => t.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

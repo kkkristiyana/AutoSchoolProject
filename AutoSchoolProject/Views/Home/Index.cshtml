@@ -1,8 +1,45 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Начало";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="p-4 p-md-5 mb-4 bg-light rounded-3 border">
+    <div class="container-fluid py-2">
+        <h1 class="display-6 mb-2">Автошкола – система за управление</h1>
+        <p class="text-muted mb-3">
+            Курсове, записване за практика, графици, тестове и админ/инструктор панел.
+        </p>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Courses">Курсове и цени</a>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
+            <a class="btn btn-outline-dark" asp-controller="Home" asp-action="Contacts">Контакти</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Посетител</h5>
+                <p class="card-text">Разглежда информация и изпраща заявка за записване.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Курсист</h5>
+                <p class="card-text">Записва часове от свободни слотове, вижда график и тестове.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Инструктор / Админ</h5>
+                <p class="card-text">Одобряване/отказ на часове, отбелязване проведен час, справки.</p>
+            </div>
+        </div>
+    </div>
 </div>

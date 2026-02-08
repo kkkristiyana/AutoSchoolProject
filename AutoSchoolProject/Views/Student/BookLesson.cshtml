@@ -7,7 +7,6 @@
 <h2 class="mb-3">Запази час</h2>
 
 <div asp-validation-summary="All" class="text-danger"></div>
-<span asp-validation-for="DateTime" class="text-danger"></span>
 
 <div class="card">
     <div class="card-body">
@@ -20,12 +19,11 @@
             <input type="hidden" asp-for="CourseId" />
 
             <div class="mb-3">
-                <label asp-for="DateTime" class="form-label">Дата и час</label>
-                <input asp-for="DateTime"
-                       type="datetime-local"
-                       class="form-control"
-                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
-                <span asp-validation-for="DateTime" class="text-danger"></span>
+                <label asp-for="SlotId" class="form-label">Свободни часове</label>
+                <select asp-for="SlotId" asp-items="Model.AvailableSlots" class="form-select">
+                    <option value="">-- избери --</option>
+                </select>
+                <span asp-validation-for="SlotId" class="text-danger"></span>
             </div>
 
             <button class="btn btn-success" type="submit">Запази</button>
