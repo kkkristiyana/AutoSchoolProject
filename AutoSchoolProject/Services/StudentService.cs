@@ -5,6 +5,7 @@ using AutoSchoolProject.ViewModels.Student;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using AutoSchoolProject.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AutoSchoolProject.Services
 {
@@ -27,12 +28,13 @@ namespace AutoSchoolProject.Services
                 .Include(s => s.ScheduledLessons)
                 .FirstAsync(s => s.UserId == userId);
         }
+
         public async Task<StudentProfileViewModel> GetProfileAsync(ClaimsPrincipal user)
         {
             var student = await GetStudentAsync(user);
 
-            int completedLessons = student.ScheduledLessons
-                .Count(l => l.Completed);
+            int completedLessons = student.ScheduledLessons.Count(l => l.Completed);
+            var required = student.Course?.RequiredPracticeLessons ?? 31;
 
             return new StudentProfileViewModel
             {
@@ -40,9 +42,8 @@ namespace AutoSchoolProject.Services
                 Email = student.User.Email,
                 PhoneNumber = student.User.PhoneNumber,
                 CourseName = student.Course?.Name,
-
                 CompletedLessons = completedLessons,
-                RemainingLessons = 31 - completedLessons
+                RemainingLessons = Math.Max(0, required - completedLessons)
             };
         }
 
@@ -61,34 +62,81 @@ namespace AutoSchoolProject.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task<BookLessonViewModel> GetBookLessonAsync(ClaimsPrincipal user, int instructorId)
+        {
+            var student = await GetStudentAsync(user);
+
+            var instructor = await _context.Instructors
+                .Include(i => i.User)
+                .FirstAsync(i => i.Id == instructorId);
+
+            var now = DateTime.Now;
+
+            var slots = await _context.PracticeLessons
+                .Where(l => l.InstructorId == instructorId
+                            && l.StudentId == null
+                            && l.Status == LessonStatus.Available
+                            && l.DateTime >= now
+                            && (!student.CourseId.HasValue || l.CourseId == student.CourseId))
+                .OrderBy(l => l.DateTime)
+                .Take(50)
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = l.DateTime.ToString("dd.MM.yyyy HH:mm")
+                })
+                .ToListAsync();
+
+            return new BookLessonViewModel
+            {
+                InstructorId = instructorId,
+                InstructorName = instructor.User.FirstName + " " + instructor.User.LastName,
+                StudentId = student.Id,
+                CourseId = student.CourseId,
+                AvailableSlots = slots
+            };
+        }
+
         public async Task BookLessonAsync(ClaimsPrincipal user, BookLessonViewModel model)
         {
             var student = await GetStudentAsync(user);
 
-            var lesson = new PracticeLesson
-            {
-                StudentId = student.Id,
-                InstructorId = model.InstructorId,
-                CourseId = student.CourseId,
-                DateTime = model.DateTime,
-                Completed = false,
-                Status = LessonStatus.Pending
-            };
+            var slot = await _context.PracticeLessons
+                .FirstOrDefaultAsync(l =>
+                    l.Id == model.SlotId &&
+                    l.InstructorId == model.InstructorId &&
+                    l.StudentId == null &&
+                    l.Status == LessonStatus.Available);
 
-            var duration = 50;
+            if (slot == null)
+                throw new InvalidOperationException("Избраният слот вече не е наличен.");
+
+            if (slot.DateTime < DateTime.Now)
+                throw new InvalidOperationException("Не можеш да записваш час в миналото.");
+
+            var start = slot.DateTime;
+            var end = slot.DateTime.AddMinutes(slot.DurationMinutes);
 
             bool overlaps = await _context.PracticeLessons.AnyAsync(l =>
                 l.InstructorId == model.InstructorId &&
+                l.Id != slot.Id &&
                 l.Status != LessonStatus.Cancelled &&
                 l.Status != LessonStatus.Rejected &&
-                l.DateTime < model.DateTime.AddMinutes(duration) &&
-                model.DateTime < l.DateTime.AddMinutes(l.DurationMinutes));
+                l.DateTime < end &&
+                start < l.DateTime.AddMinutes(l.DurationMinutes));
 
-            if (overlaps) throw new InvalidOperationException("Този час вече е зает.");
+            if (overlaps)
+                throw new InvalidOperationException("Този час вече е зает.");
 
-            _context.PracticeLessons.Add(lesson);
+            slot.StudentId = student.Id;
+            slot.CourseId = student.CourseId;
+            slot.Status = LessonStatus.Pending;
+            slot.Completed = false;
+            slot.Note = string.IsNullOrWhiteSpace(slot.Note) ? "Запазен час" : slot.Note;
+
             await _context.SaveChangesAsync();
         }
+
         public async Task<List<InstructorListViewModel>> GetInstructorsAsync()
         {
             return await _context.Instructors
@@ -104,6 +152,7 @@ namespace AutoSchoolProject.Services
                 })
                 .ToListAsync();
         }
+
         public async Task<InstructorDetailsViewModel> GetInstructorDetailsAsync(int instructorId)
         {
             var instructor = await _context.Instructors
@@ -120,22 +169,7 @@ namespace AutoSchoolProject.Services
                 SchoolName = "Autoschool Lucky-Cars EOOD"
             };
         }
-        public async Task<BookLessonViewModel> GetBookLessonAsync(ClaimsPrincipal user, int instructorId)
-        {
-            var student = await GetStudentAsync(user);
 
-            var instructor = await _context.Instructors
-                .Include(i => i.User)
-                .FirstAsync(i => i.Id == instructorId);
-
-            return new BookLessonViewModel
-            {
-                InstructorId = instructorId,
-                InstructorName = instructor.User.FirstName + " " + instructor.User.LastName,
-                StudentId = student.Id,
-                CourseId = student.CourseId
-            };
-        }
         public async Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId, DateTime start, DateTime end)
         {
             return await _context.PracticeLessons
@@ -145,6 +179,7 @@ namespace AutoSchoolProject.Services
                     && l.Status != LessonStatus.Rejected)
                 .ToListAsync();
         }
+
         public async Task<EditStudentProfileViewModel> GetEditProfileAsync(ClaimsPrincipal user)
         {
             var student = await GetStudentAsync(user);
@@ -155,9 +190,10 @@ namespace AutoSchoolProject.Services
                 LastName = student.User.LastName,
                 Email = student.User.Email,
                 PhoneNumber = student.User.PhoneNumber,
-                CourseId = (int)student.CourseId
+                CourseId = student.CourseId ?? 0
             };
         }
+
         public async Task<List<MyLessonListItemViewModel>> GetMyLessonsAsync(ClaimsPrincipal user)
         {
             var student = await GetStudentAsync(user);
@@ -178,6 +214,92 @@ namespace AutoSchoolProject.Services
                     Note = l.Note
                 })
                 .ToListAsync();
+        }
+
+        public async Task CancelLessonAsync(ClaimsPrincipal user, int lessonId)
+        {
+            var student = await GetStudentAsync(user);
+
+            var lesson = await _context.PracticeLessons
+                .FirstOrDefaultAsync(l => l.Id == lessonId && l.StudentId == student.Id);
+
+            if (lesson == null)
+                throw new InvalidOperationException("Часът не е намерен.");
+
+            if (lesson.DateTime <= DateTime.Now)
+                throw new InvalidOperationException("Не можеш да отменяш минали часове.");
+
+            if (lesson.Status != LessonStatus.Pending && lesson.Status != LessonStatus.Approved)
+                throw new InvalidOperationException("Този час не може да бъде отменен.");
+
+            lesson.Status = LessonStatus.Cancelled;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<StudentTestResultsViewModel> GetTestResultsAsync(ClaimsPrincipal user)
+        {
+            var student = await GetStudentAsync(user);
+
+            var results = await _context.TestResultListovki
+                .Where(r => r.StudentId == student.Id)
+                .OrderByDescending(r => r.Date)
+                .Select(r => new TestResultRowViewModel
+                {
+                    Date = r.Date,
+                    Score = r.Score
+                })
+                .ToListAsync();
+
+            return new StudentTestResultsViewModel
+            {
+                FullName = $"{student.User.FirstName} {student.User.LastName}",
+                CourseName = student.Course?.Name,
+                Results = results
+            };
+        }
+
+
+        public async Task<StudentScheduleViewModel> GetScheduleAsync(ClaimsPrincipal user)
+        {
+            var student = await GetStudentAsync(user);
+            var now = DateTime.Now;
+
+            var practice = await _context.PracticeLessons
+                .Where(l => l.StudentId == student.Id && l.DateTime >= now)
+                .Include(l => l.Instructor).ThenInclude(i => i.User)
+                .OrderBy(l => l.DateTime)
+                .Select(l => new SchedulePracticeRowViewModel
+                {
+                    Id = l.Id,
+                    DateTime = l.DateTime,
+                    InstructorName = l.Instructor != null ? (l.Instructor.User.FirstName + " " + l.Instructor.User.LastName) : null,
+                    Status = l.Status.ToString(),
+                    Completed = l.Completed
+                })
+                .ToListAsync();
+
+            var theory = new List<ScheduleTheoryRowViewModel>();
+            if (student.CourseId.HasValue)
+            {
+                theory = await _context.TheorySessions
+                    .Where(t => t.CourseId == student.CourseId.Value && t.DateTime >= now)
+                    .OrderBy(t => t.DateTime)
+                    .Select(t => new ScheduleTheoryRowViewModel
+                    {
+                        DateTime = t.DateTime,
+                        DurationMinutes = t.DurationMinutes,
+                        Topic = t.Topic,
+                        Location = t.Location
+                    })
+                    .ToListAsync();
+            }
+
+            return new StudentScheduleViewModel
+            {
+                CourseName = student.Course?.Name,
+                Practice = practice,
+                Theory = theory
+            };
         }
     }
 }

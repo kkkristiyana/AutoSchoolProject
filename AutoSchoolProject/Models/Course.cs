@@ -8,5 +8,6 @@
 
         public ICollection<PracticeLesson>? PracticeLessons { get; set; }
         public ICollection<Student>? Students { get; set; }
+        public int RequiredPracticeLessons { get; set; } = 31;
     }
 }

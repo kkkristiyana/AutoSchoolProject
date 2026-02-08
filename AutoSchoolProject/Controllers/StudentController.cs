@@ -29,10 +29,7 @@ public class StudentController : Controller
     [HttpPost]
     public async Task<IActionResult> EditProfile(EditStudentProfileViewModel model)
     {
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
+        if (!ModelState.IsValid) return View(model);
 
         await _studentService.UpdateProfileAsync(User, model);
         return RedirectToAction(nameof(Profile));
@@ -60,18 +57,29 @@ public class StudentController : Controller
     public async Task<IActionResult> BookLesson(BookLessonViewModel model)
     {
         if (!ModelState.IsValid)
-            return View(model);
-
-        if (model.DateTime < DateTime.Now)
         {
-            ModelState.AddModelError(nameof(model.DateTime),
-                "Не можеш да записваш час в миналото.");
+            var refreshed = await _studentService.GetBookLessonAsync(User, model.InstructorId);
+            model.AvailableSlots = refreshed.AvailableSlots;
+            model.InstructorName = refreshed.InstructorName;
             return View(model);
         }
 
-        await _studentService.BookLessonAsync(User, model);
-        return RedirectToAction(nameof(Profile));
+        try
+        {
+            await _studentService.BookLessonAsync(User, model);
+            return RedirectToAction(nameof(MyLessons));
+        }
+        catch (InvalidOperationException ex)
+        {
+            ModelState.AddModelError("", ex.Message);
+
+            var refreshed = await _studentService.GetBookLessonAsync(User, model.InstructorId);
+            model.AvailableSlots = refreshed.AvailableSlots;
+            model.InstructorName = refreshed.InstructorName;
+            return View(model);
+        }
     }
+
     [HttpGet]
     public async Task<IActionResult> InstructorSchedule(int instructorId, DateTime start, DateTime end)
     {
@@ -80,16 +88,47 @@ public class StudentController : Controller
         var events = lessons.Select(l => new
         {
             id = l.Id,
-            title = l.Status == AutoSchoolProject.Models.Enums.LessonStatus.Pending ? "Заявка" : "Заето",
+            title = l.Status == AutoSchoolProject.Models.Enums.LessonStatus.Available ? "Свободно" :
+                    l.Status == AutoSchoolProject.Models.Enums.LessonStatus.Pending ? "Заявка" : "Заето",
             start = l.DateTime,
             end = l.DateTime.AddMinutes(l.DurationMinutes)
         });
 
         return Json(events);
     }
+
     public async Task<IActionResult> MyLessons()
     {
         var model = await _studentService.GetMyLessonsAsync(User);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CancelLesson(int id)
+    {
+        try
+        {
+            await _studentService.CancelLessonAsync(User, id);
+            TempData["Success"] = "Часът е отменен.";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(MyLessons));
+    }
+
+    public async Task<IActionResult> TestResults()
+    {
+        var model = await _studentService.GetTestResultsAsync(User);
+        return View(model);
+    }
+
+    public async Task<IActionResult> Schedule()
+    {
+        var model = await _studentService.GetScheduleAsync(User);
         return View(model);
     }
 }
