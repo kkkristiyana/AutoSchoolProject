@@ -4,19 +4,16 @@ using AutoSchoolProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AutoSchoolProject.Data.Migrations
+namespace AutoSchoolProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260119173826_AddCourseIdToStudentExplicit")]
-    partial class AddCourseIdToStudentExplicit
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,9 +109,56 @@ namespace AutoSchoolProject.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("RequiredPracticeLessons")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("AutoSchoolProject.Models.EnrollmentRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedStudentUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PreferredStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("EnrollmentRequests");
                 });
 
             modelBuilder.Entity("AutoSchoolProject.Models.Instructor", b =>
@@ -125,11 +169,16 @@ namespace AutoSchoolProject.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -154,12 +203,18 @@ namespace AutoSchoolProject.Data.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
+
                     b.Property<int?>("InstructorId")
                         .HasColumnType("int");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<int?>("StudentId")
                         .HasColumnType("int");
@@ -208,7 +263,7 @@ namespace AutoSchoolProject.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DateTime")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Score")
@@ -222,6 +277,37 @@ namespace AutoSchoolProject.Data.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("TestResultListovki");
+                });
+
+            modelBuilder.Entity("AutoSchoolProject.Models.TheorySession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("TheorySessions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -357,20 +443,37 @@ namespace AutoSchoolProject.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AutoSchoolProject.Models.EnrollmentRequest", b =>
+                {
+                    b.HasOne("AutoSchoolProject.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("AutoSchoolProject.Models.Instructor", b =>
                 {
+                    b.HasOne("AutoSchoolProject.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId");
+
                     b.HasOne("AutoSchoolProject.Models.ApplicationUser", "User")
                         .WithOne("Instructor")
                         .HasForeignKey("AutoSchoolProject.Models.Instructor", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Course");
+
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("AutoSchoolProject.Models.PracticeLesson", b =>
                 {
-                    b.HasOne("AutoSchoolProject.Models.Course", null)
+                    b.HasOne("AutoSchoolProject.Models.Course", "Course")
                         .WithMany("PracticeLessons")
                         .HasForeignKey("CourseId");
 
@@ -381,6 +484,8 @@ namespace AutoSchoolProject.Data.Migrations
                     b.HasOne("AutoSchoolProject.Models.Student", "Student")
                         .WithMany("ScheduledLessons")
                         .HasForeignKey("StudentId");
+
+                    b.Navigation("Course");
 
                     b.Navigation("Instructor");
 
@@ -413,6 +518,17 @@ namespace AutoSchoolProject.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("AutoSchoolProject.Models.TheorySession", b =>
+                {
+                    b.HasOne("AutoSchoolProject.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

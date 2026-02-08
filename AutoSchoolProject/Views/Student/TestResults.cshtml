@@ -1,0 +1,37 @@
+﻿@model AutoSchoolProject.ViewModels.Student.StudentTestResultsViewModel
+
+@{
+    ViewData["Title"] = "Резултати от тестове";
+}
+
+<h2 class="mb-3">📝 Резултати от вътрешни тестове (теория)</h2>
+
+<div class="mb-2">
+    <strong>Курсист:</strong> @Model.FullName<br />
+    <strong>Курс:</strong> @Model.CourseName
+</div>
+
+@if (!Model.Results.Any())
+{
+    <div class="alert alert-info">Няма въведени резултати.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Резултат</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.Results)
+            {
+                <tr>
+                    <td>@r.Date.ToString("dd.MM.yyyy")</td>
+                    <td>@r.Score %</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

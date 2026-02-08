@@ -6,6 +6,15 @@
 
 <h2 class="mb-3">📅 Моите часове</h2>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
 @if (!Model.Any())
 {
     <div class="alert alert-info">Нямаш записани часове.</div>
@@ -20,6 +29,8 @@ else
                 <th>Категория</th>
                 <th>Статус</th>
                 <th>Завършен</th>
+                <th>Бележка</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +42,20 @@ else
                     <td>@l.CourseName</td>
                     <td>@l.Status</td>
                     <td>@(l.Completed ? "✅" : "—")</td>
+                    <td>@l.Note</td>
+                    <td>
+                        @if (!l.Completed && l.DateTime > DateTime.Now && (l.Status == "Pending" || l.Status == "Approved"))
+                        {
+                            <form asp-action="CancelLesson" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@l.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Сигурен ли си, че искаш да отмениш този час?');">
+                                    Отмени
+                                </button>
+                            </form>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>

@@ -1,0 +1,33 @@
+﻿@model AutoSchoolProject.ViewModels.Instructor.RescheduleLessonViewModel
+
+@{
+    ViewData["Title"] = "Промяна на час";
+}
+
+<h2 class="mb-3">Промени час</h2>
+
+<div class="card">
+    <div class="card-body">
+        <p class="mb-1"><strong>Курсист:</strong> @Model.StudentName</p>
+        <p class="mb-3"><strong>Текущ час:</strong> @Model.CurrentDateTime.ToString("dd.MM.yyyy HH:mm")</p>
+
+        <form asp-action="Reschedule" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="LessonId" />
+
+            <div class="mb-3">
+                <label class="form-label">Нов час</label>
+                <input name="NewDateTime" type="datetime-local" class="form-control"
+                       value="@Model.NewDateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="NewDateTime" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Запази</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Назад</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
