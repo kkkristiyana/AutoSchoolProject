@@ -125,7 +125,7 @@ namespace AutoSchoolProject.Controllers
         {
             var lesson = await _context.PracticeLessons.FindAsync(id);
 
-            lesson.Status = 1;
+            lesson.Status = Models.Enums.LessonStatus.Pending;
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -134,7 +134,7 @@ namespace AutoSchoolProject.Controllers
         {
             var lesson = await _context.PracticeLessons.FindAsync(id);
 
-            lesson.Status = 2;
+            lesson.Status = Models.Enums.LessonStatus.Approved;
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
