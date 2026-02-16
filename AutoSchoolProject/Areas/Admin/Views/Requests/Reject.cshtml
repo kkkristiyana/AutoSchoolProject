@@ -1,0 +1,24 @@
+﻿@model RejectEnrollmentRequestViewModel
+
+@{
+    ViewData["Title"] = "Откажи заявка";
+}
+
+<h2 class="mb-3">❌ Откажи заявка #@Model.RequestId</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Reject" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="RequestId" />
+
+            <div class="mb-3">
+                <label asp-for="AdminNote" class="form-label">Причина / бележка (по желание)</label>
+                <textarea asp-for="AdminNote" class="form-control" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-danger">Откажи</button>
+            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.RequestId">Назад</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+﻿@model ApproveEnrollmentRequestViewModel
+
+@{
+    ViewData["Title"] = "Одобри заявка";
+}
+
+<h2 class="mb-3">✅ Одобри заявка #@Model.RequestId</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="mb-1"><strong>Име:</strong> @Model.FullName</p>
+        <p class="mb-1"><strong>Телефон:</strong> @Model.PhoneNumber</p>
+        <p class="mb-1"><strong>Курс:</strong> @Model.CourseName</p>
+        <p class="mb-0"><strong>Старт:</strong> @Model.PreferredStartDate.ToString("dd.MM.yyyy")</p>
+    </div>
+</div>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Approve" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="RequestId" />
+            <input type="hidden" asp-for="FullName" />
+            <input type="hidden" asp-for="PhoneNumber" />
+            <input type="hidden" asp-for="CourseName" />
+            <input type="hidden" asp-for="PreferredStartDate" />
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email (за вход)</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Парола</label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label">Потвърди парола</label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="AdminNote" class="form-label">Бележка (по желание)</label>
+                <textarea asp-for="AdminNote" class="form-control" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">Одобри и създай профил</button>
+            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.RequestId">Назад</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

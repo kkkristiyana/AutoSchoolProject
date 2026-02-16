@@ -1,0 +1,32 @@
+﻿@model AutoSchoolProject.ViewModels.Instructor.CreateLessonViewModel
+
+@{
+    ViewData["Title"] = "Създаване на урок";
+}
+
+<h2 class="mb-4">Създаване на нов урок</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="StudentId" class="form-label"></label>
+        <select asp-for="StudentId" asp-items="Model.Students" class="form-select">
+            <option value="">-- Избери курсист --</option>
+        </select>
+        <span asp-validation-for="StudentId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DateTime" class="form-label"></label>
+        <input asp-for="DateTime" type="datetime-local" class="form-control" />
+        <span asp-validation-for="DateTime" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DurationMinutes" class="form-label"></label>
+        <input asp-for="DurationMinutes" class="form-control" />
+        <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Създай</button>
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>

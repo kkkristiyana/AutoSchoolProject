@@ -1,0 +1,44 @@
+﻿@model EnrollmentRequestDetailsViewModel
+@using AutoSchoolProject.Models.Enums
+
+@{
+    ViewData["Title"] = "Детайли на заявка";
+}
+
+<h2 class="mb-3">📄 Заявка #@Model.Id</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="mb-1"><strong>Име:</strong> @Model.FullName</p>
+        <p class="mb-1"><strong>Телефон:</strong> @Model.PhoneNumber</p>
+        <p class="mb-1"><strong>Курс:</strong> @Model.CourseName</p>
+        <p class="mb-1"><strong>Предпочитан старт:</strong> @Model.PreferredStartDate.ToString("dd.MM.yyyy")</p>
+        <p class="mb-1"><strong>Статус:</strong> @Model.Status</p>
+        <p class="mb-1"><strong>Създадена:</strong> @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+
+        @if (Model.ProcessedAt != null)
+        {
+            <p class="mb-1"><strong>Обработена:</strong> @Model.ProcessedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.AdminNote))
+        {
+            <p class="mb-1"><strong>Бележка (Admin):</strong> @Model.AdminNote</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.CreatedStudentEmail))
+        {
+            <p class="mb-0"><strong>Създаден курсист:</strong> @Model.CreatedStudentEmail</p>
+        }
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" asp-action="Index">Назад</a>
+
+    @if (Model.Status == RequestStatus.New)
+    {
+        <a class="btn btn-success" asp-action="Approve" asp-route-id="@Model.Id">Approve</a>
+        <a class="btn btn-danger" asp-action="Reject" asp-route-id="@Model.Id">Reject</a>
+    }
+</div>

@@ -1,0 +1,45 @@
+﻿@model AutoSchoolProject.ViewModels.Instructor.InstructorDashboardViewModel
+
+@{
+    ViewData["Title"] = "Instructor Dashboard";
+}
+
+<h2 class="mb-4">Инструкторски панел</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h5>Общо завършени часове</h5>
+            <h3>@Model.CompletedLessonsCount</h3>
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">Предстоящи уроци</h4>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Курсист</th>
+            <th>Дата</th>
+            <th>Статус</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var lesson in Model.UpcomingLessons)
+        {
+            <tr>
+                <td>@lesson.Student.User.FirstName @lesson.Student.User.LastName</td>
+                <td>@lesson.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>@lesson.Status</td>
+                <td>
+                    <a asp-action="Reschedule" asp-route-id="@lesson.Id" class="btn btn-sm btn-warning">Пренасрочи</a>
+                    <a asp-action="Complete" asp-route-id="@lesson.Id" class="btn btn-sm btn-success">Завършен</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary mt-3">+ Нов урок</a>

@@ -1,0 +1,79 @@
+﻿@model List<EnrollmentRequestRowViewModel>
+@using AutoSchoolProject.Models.Enums
+
+@{
+    ViewData["Title"] = "Заявки за записване";
+}
+
+<h2 class="mb-3">📝 Заявки за записване</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="status" class="form-select">
+            <option value="">Всички</option>
+            <option value="New" selected="@(ViewBag.Status == "New")">New</option>
+            <option value="Approved" selected="@(ViewBag.Status == "Approved")">Approved</option>
+            <option value="Rejected" selected="@(ViewBag.Status == "Rejected")">Rejected</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary">Филтър</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Изчисти</a>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Няма заявки.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Име</th>
+                <th>Телефон</th>
+                <th>Курс</th>
+                <th>Старт</th>
+                <th>Статус</th>
+                <th>Създадена</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Id</td>
+                    <td>@r.FullName</td>
+                    <td>@r.PhoneNumber</td>
+                    <td>@r.CourseName</td>
+                    <td>@r.PreferredStartDate.ToString("dd.MM.yyyy")</td>
+                    <td><strong>@r.Status</strong></td>
+                    <td>@r.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary"
+                           asp-area="Admin" asp-controller="Requests" asp-action="Details"
+                           asp-route-id="@r.Id">Details</a>
+
+                        @if (r.Status == RequestStatus.New)
+                        {
+                            <a class="btn btn-sm btn-success"
+                               asp-area="Admin" asp-controller="Requests" asp-action="Approve"
+                               asp-route-id="@r.Id">Approve</a>
+
+                            <a class="btn btn-sm btn-danger"
+                               asp-area="Admin" asp-controller="Requests" asp-action="Reject"
+                               asp-route-id="@r.Id">Reject</a>
+                        }
+                    </td>
+                </tr>
+            }            
+        </tbody>
+    </table>
+}
+<a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+   class="btn btn-sm btn-outline-secondary mb-3">
+    ← Назад към Dashboard
+</a>
