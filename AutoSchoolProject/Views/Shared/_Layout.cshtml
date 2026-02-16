@@ -63,8 +63,9 @@
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Instructor"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="Instructor" asp-controller="Schedule" asp-action="Index">🧑‍🏫 Инструктор</a>
+                                <a class="nav-link" asp-controller="Instructor" asp-action="Index">🧑‍🏫 Инструктор</a>
                             </li>
+
                         }
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))

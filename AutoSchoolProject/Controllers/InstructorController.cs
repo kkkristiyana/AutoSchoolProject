@@ -139,5 +139,9 @@ namespace AutoSchoolProject.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        public IActionResult Schedule()
+        {
+            return View();
+        }
     }
 }
