@@ -301,5 +301,12 @@ namespace AutoSchoolProject.Services
                 Theory = theory
             };
         }
+        public async Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId)
+        {
+            return await _context.PracticeLessons
+                .Where(l => l.InstructorId == instructorId)
+                .ToListAsync();
+        }
+
     }
 }

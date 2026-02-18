@@ -20,6 +20,7 @@ namespace AutoSchoolProject.Services.Interfaces
         Task<StudentTestResultsViewModel> GetTestResultsAsync(ClaimsPrincipal user);
         Task CancelLessonAsync(ClaimsPrincipal user, int lessonId);
         Task<StudentScheduleViewModel> GetScheduleAsync(ClaimsPrincipal user);
+        Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId);
 
     }
 }

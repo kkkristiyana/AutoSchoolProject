@@ -1,6 +1,9 @@
 ﻿using AutoSchoolProject.Data;
+using AutoSchoolProject.Models;
+using AutoSchoolProject.ViewModels.Instructor;
 using AutoSchoolProject.ViewModels.Student;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AutoSchoolProject.Services
 {
@@ -31,5 +34,32 @@ namespace AutoSchoolProject.Services
                 Car = "Toyota Yaris (Manual)"
             };
         }
+        private async Task<Instructor> GetInstructorAsync(ClaimsPrincipal user)
+        {
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return await _context.Instructors
+                .Include(i => i.User)
+                .FirstAsync(i => i.UserId == userId);
+        }
+        public async Task<InstructorDashboardViewModel> GetDashboardAsync(ClaimsPrincipal user)
+        {
+            var instructor = await GetInstructorAsync(user);
+
+            var lessons = await _context.PracticeLessons
+                .Where(l => l.InstructorId == instructor.Id)
+                .Include(l => l.Student).ThenInclude(s => s.User)
+                .ToListAsync();
+
+            return new InstructorDashboardViewModel
+            {
+                CompletedLessonsCount = lessons.Count(l => l.Completed),
+                UpcomingLessons = lessons
+                    .Where(l => l.DateTime >= DateTime.Now)
+                    .OrderBy(l => l.DateTime)
+                    .ToList()
+            };
+        }
+
     }
 }

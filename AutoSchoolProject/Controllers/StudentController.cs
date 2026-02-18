@@ -2,6 +2,7 @@
 using AutoSchoolProject.ViewModels.Student;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 [Authorize(Roles = "Student")]
 public class StudentController : Controller
@@ -131,4 +132,21 @@ public class StudentController : Controller
         var model = await _studentService.GetScheduleAsync(User);
         return View(model);
     }
+    [HttpGet]
+    [HttpGet]
+    public async Task<IActionResult> GetInstructorLessons(int instructorId)
+    {
+        var lessons = await _studentService.GetInstructorLessonsAsync(instructorId);
+
+        var result = lessons.Select(l => new
+        {
+            title = "Заето",
+            DateTime = l.DateTime,
+            DurationMinutes = l.DurationMinutes,
+            Status = l.Status.ToString()
+        });
+
+        return Json(result);
+    }
+
 }

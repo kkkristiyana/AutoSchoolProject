@@ -37,6 +37,23 @@
                     <a asp-action="Reschedule" asp-route-id="@lesson.Id" class="btn btn-sm btn-warning">Пренасрочи</a>
                     <a asp-action="Complete" asp-route-id="@lesson.Id" class="btn btn-sm btn-success">Завършен</a>
                 </td>
+                <td>
+                    @{
+                        string badgeClass = lesson.Status switch
+                        {
+                            AutoSchoolProject.Models.Enums.LessonStatus.Pending => "bg-warning",
+                            AutoSchoolProject.Models.Enums.LessonStatus.Approved => "bg-success",
+                            AutoSchoolProject.Models.Enums.LessonStatus.Rejected => "bg-danger",
+                            AutoSchoolProject.Models.Enums.LessonStatus.Cancelled => "bg-secondary",
+                            _ => "bg-info"
+                        };
+                    }
+
+                    <span class="badge @badgeClass">
+                        @lesson.Status
+                    </span>
+                </td>
+
             </tr>
         }
     </tbody>

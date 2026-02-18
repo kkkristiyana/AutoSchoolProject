@@ -1,37 +1,38 @@
 ﻿@model AutoSchoolProject.ViewModels.Student.BookLessonViewModel
 
-@{
-    ViewData["Title"] = "Запази час";
-}
+<h2>Запази час</h2>
 
-<h2 class="mb-3">Запази час</h2>
+<div id="calendar"></div>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<form asp-action="BookLesson" method="post">
+    <input type="hidden" asp-for="SlotId" id="selectedSlotId" />
 
-<div class="card">
-    <div class="card-body">
-        <input type="hidden" asp-for="InstructorId" />
-        <h4>Инструктор: @Model.InstructorName</h4>
+    <button type="submit" class="btn btn-success mt-3">
+        Запази избрания час
+    </button>
+</form>
 
-        <form asp-controller="Student" asp-action="BookLesson" method="post">
-            <input type="hidden" asp-for="InstructorId" />
-            <input type="hidden" asp-for="StudentId" />
-            <input type="hidden" asp-for="CourseId" />
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-            <div class="mb-3">
-                <label asp-for="SlotId" class="form-label">Свободни часове</label>
-                <select asp-for="SlotId" asp-items="Model.AvailableSlots" class="form-select">
-                    <option value="">-- избери --</option>
-                </select>
-                <span asp-validation-for="SlotId" class="text-danger"></span>
-            </div>
+        var calendarEl = document.getElementById('calendar');
 
-            <button class="btn btn-success" type="submit">Запази</button>
-            <a class="btn btn-outline-secondary" asp-controller="Student" asp-action="Instructors">Отказ</a>
-        </form>
-    </div>
-</div>
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            selectable: true,
+            allDaySlot: false,
+            slotMinTime: "08:00:00",
+            slotMaxTime: "18:00:00",
+            selectMirror: true,
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+            select: function(info) {
+
+                alert("Избра: " + info.startStr);
+
+                document.getElementById("selectedSlotId").value = info.startStr;
+            }
+        });
+
+        calendar.render();
+    });
+</script>
