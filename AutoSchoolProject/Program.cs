@@ -35,6 +35,7 @@ namespace AutoSchoolProject
             builder.Services.AddScoped<InstructorService>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
+            builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 
             var app = builder.Build();
 

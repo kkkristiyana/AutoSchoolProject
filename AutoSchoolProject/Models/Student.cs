@@ -10,5 +10,7 @@
 
         public ICollection<PracticeLesson>? ScheduledLessons { get; set; }
         public ICollection<TestResultListovki>? TestResults { get; set; }
+        public string? ProfileImage { get; set; }
+        public string? ProfileImagePath { get; set; }
     }
 }

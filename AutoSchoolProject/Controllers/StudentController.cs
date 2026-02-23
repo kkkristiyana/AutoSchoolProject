@@ -1,6 +1,9 @@
-﻿using AutoSchoolProject.Services.Interfaces;
+﻿using AutoSchoolProject.Models;
+using AutoSchoolProject.Services;
+using AutoSchoolProject.Services.Interfaces;
 using AutoSchoolProject.ViewModels.Student;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +11,14 @@ using Microsoft.EntityFrameworkCore;
 public class StudentController : Controller
 {
     private readonly IStudentService _studentService;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IFileStorageService _fileStorage;
 
-    public StudentController(IStudentService studentService)
+    public StudentController(IStudentService studentService, UserManager<ApplicationUser> userManager,IFileStorageService fileStorage)
     {
         _studentService = studentService;
+        _userManager = userManager;
+        _fileStorage = fileStorage;
     }
 
     public async Task<IActionResult> Profile()
@@ -23,19 +30,46 @@ public class StudentController : Controller
     [HttpGet]
     public async Task<IActionResult> EditProfile()
     {
-        var model = await _studentService.GetEditProfileAsync(User);
+        var user = await _userManager.GetUserAsync(User);
+
+        var model = new EditStudentProfileViewModel
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            PhoneNumber = user.PhoneNumber,
+            ExistingProfileImagePath = user.ProfileImagePath
+        };
+
         return View(model);
     }
 
     [HttpPost]
     public async Task<IActionResult> EditProfile(EditStudentProfileViewModel model)
     {
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid)
+            return View(model);
 
-        await _studentService.UpdateProfileAsync(User, model);
+        var user = await _userManager.GetUserAsync(User);
+
+        user.FirstName = model.FirstName;
+        user.LastName = model.LastName;
+        user.PhoneNumber = model.PhoneNumber;
+
+        if (model.ProfileImage != null)
+        {
+            //изтриваме старата
+            _fileStorage.DeleteFile(user.ProfileImagePath);
+
+            //записваме новата
+            var path = await _fileStorage.SaveFileAsync(model.ProfileImage, "profile");
+
+            user.ProfileImagePath = path;
+        }
+
+        await _userManager.UpdateAsync(user);
+
         return RedirectToAction(nameof(Profile));
     }
-
     public async Task<IActionResult> Instructors()
     {
         var model = await _studentService.GetInstructorsAsync();
@@ -132,7 +166,6 @@ public class StudentController : Controller
         var model = await _studentService.GetScheduleAsync(User);
         return View(model);
     }
-    [HttpGet]
     [HttpGet]
     public async Task<IActionResult> GetInstructorLessons(int instructorId)
     {

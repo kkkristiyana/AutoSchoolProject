@@ -6,6 +6,11 @@
 
 <h2 class="mb-4">Моят профил</h2>
 
+@if (!string.IsNullOrEmpty(Model.ProfileImagePath))
+{
+    <img src="@Model.ProfileImagePath" width="150" />
+}
+
 <div class="card shadow-sm mb-4">
     <div class="card-body">
         <h5 class="card-title">@Model.FullName</h5>
@@ -36,3 +41,4 @@
         📅 Запази час
     </a>
 </div>
+

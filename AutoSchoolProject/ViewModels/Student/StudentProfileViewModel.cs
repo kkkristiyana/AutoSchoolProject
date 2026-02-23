@@ -10,5 +10,7 @@
 
         public int CompletedLessons { get; set; }
         public int RemainingLessons { get; set; }
+        public IFormFile? ProfileImage { get; set; }
+        public string? ProfileImagePath { get; set; }
     }
 }

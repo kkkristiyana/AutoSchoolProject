@@ -25,5 +25,8 @@ namespace AutoSchoolProject.ViewModels.Student
         [Required]
         [Display(Name = "Категория")]
         public int CourseId { get; set; }
+        public IFormFile? ProfileImage { get; set; }
+
+        public string? ExistingProfileImagePath { get; set; }
     }
 }

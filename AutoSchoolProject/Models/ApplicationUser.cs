@@ -9,5 +9,6 @@ namespace AutoSchoolProject.Models
 
         public Instructor Instructor { get; set; }
         public Student Student { get; set; }
+        public string? ProfileImagePath { get; set; }
     }
 }
