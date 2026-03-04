@@ -1,38 +1,55 @@
 ﻿@model AutoSchoolProject.ViewModels.Student.BookLessonViewModel
 
-<h2>Запази час</h2>
+@{
+    ViewData["Title"] = "Запази час";
+}
 
-<div id="calendar"></div>
+<h2 class="mb-3">📅 Запази час</h2>
 
-<form asp-action="BookLesson" method="post">
-    <input type="hidden" asp-for="SlotId" id="selectedSlotId" />
+<div class="alert alert-secondary">
+    Инструктор: <strong>@Model.InstructorName</strong>
+</div>
 
-    <button type="submit" class="btn btn-success mt-3">
-        Запази избрания час
-    </button>
-</form>
+@if (ViewData.ModelState.ErrorCount > 0)
+{
+    <div class="alert alert-danger">
+        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@err.ErrorMessage</div>
+        }
+    </div>
+}
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+@if (Model.AvailableSlots == null || !Model.AvailableSlots.Any())
+{
+    <div class="alert alert-info">
+        Няма свободни слотове за записване към момента.
+    </div>
 
-        var calendarEl = document.getElementById('calendar');
+    <a class="btn btn-outline-secondary" asp-controller="Student" asp-action="Instructors">← Назад</a>
+}
+else
+{
+    <form asp-action="BookLesson" method="post" class="card shadow-sm p-3">
+        @Html.AntiForgeryToken()
 
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            selectable: true,
-            allDaySlot: false,
-            slotMinTime: "08:00:00",
-            slotMaxTime: "18:00:00",
-            selectMirror: true,
+        <input type="hidden" asp-for="InstructorId" />
+        <input type="hidden" asp-for="StudentId" />
+        <input type="hidden" asp-for="CourseId" />
 
-            select: function(info) {
+        <div class="mb-3">
+            <label asp-for="SlotId" class="form-label">Свободен час</label>
+            <select asp-for="SlotId" asp-items="Model.AvailableSlots" class="form-select">
+                <option value="">-- Избери свободен час --</option>
+            </select>
+            <span asp-validation-for="SlotId" class="text-danger"></span>
+        </div>
 
-                alert("Избра: " + info.startStr);
+        <button type="submit" class="btn btn-success">✅ Запази</button>
+        <a class="btn btn-outline-secondary ms-2" asp-controller="Student" asp-action="Instructors">Назад</a>
+    </form>
+}
 
-                document.getElementById("selectedSlotId").value = info.startStr;
-            }
-        });
-
-        calendar.render();
-    });
-</script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoSchoolProject.ViewModels.Student
@@ -7,16 +8,16 @@ namespace AutoSchoolProject.ViewModels.Student
     {
         [Required]
         [Display(Name = "Име")]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         [Required]
         [Display(Name = "Фамилия")]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
         [Required]
         [EmailAddress]
         [Display(Name = "Имейл")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Phone]
         [Display(Name = "Телефон")]
@@ -24,9 +25,14 @@ namespace AutoSchoolProject.ViewModels.Student
 
         [Required]
         [Display(Name = "Категория")]
-        public int CourseId { get; set; }
-        public IFormFile? ProfileImage { get; set; }
+        public int? CourseId { get; set; }
 
-        public string? ExistingProfileImagePath { get; set; }
+        public List<SelectListItem> Courses { get; set; } = new();
+
+        public string? CurrentProfileImagePath { get; set; }
+
+        [Display(Name = "Профилна снимка")]
+        public IFormFile? ProfileImage { get; set; }
+        public string? ProfileImagePath { get; set; }
     }
 }

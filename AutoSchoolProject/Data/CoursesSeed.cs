@@ -12,9 +12,10 @@ namespace AutoSchoolProject.Data
             if (!context.Courses.Any())
             {
                 context.Courses.AddRange(
-                    new Course { Name = "Категория B", Price = 1200 },
-                    new Course { Name = "Категория C", Price = 2500 },
-                    new Course { Name = "Категория D", Price = 1800 }
+                    new Course { Name = "Категория A", Price = 1200, RequiredPracticeLessons = 31 },
+                    new Course { Name = "Категория B", Price = 1500, RequiredPracticeLessons = 31 },
+                    new Course { Name = "Категория C", Price = 2500, RequiredPracticeLessons = 31 },
+                    new Course { Name = "Категория D", Price = 1800, RequiredPracticeLessons = 31 }
                 );
 
                 await context.SaveChangesAsync();

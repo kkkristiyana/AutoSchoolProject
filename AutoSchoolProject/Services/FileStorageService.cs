@@ -1,56 +1,66 @@
 ﻿using AutoSchoolProject.Services.Interfaces;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace AutoSchoolProject.Services
 {
     public class FileStorageService : IFileStorageService
     {
-        private readonly IWebHostEnvironment _environment;
+        private readonly IWebHostEnvironment _env;
 
-        public FileStorageService(IWebHostEnvironment environment)
+        private const long MaxBytes = 5 * 1024 * 1024;
+        private static readonly HashSet<string> AllowedExt = new(StringComparer.OrdinalIgnoreCase)
         {
-            _environment = environment;
+            ".jpg", ".jpeg", ".png", ".webp"
+        };
+
+        public FileStorageService(IWebHostEnvironment env)
+        {
+            _env = env;
         }
 
-        public async Task<string?> SaveFileAsync(IFormFile file, string folderName)
+        public async Task<string> SaveImageAsync(IFormFile file, string folder, string? oldRelativePath = null)
         {
             if (file == null || file.Length == 0)
-                return null;
+                throw new InvalidOperationException("Файлът е празен.");
 
-            var uploadsFolder = Path.Combine(
-                _environment.WebRootPath,
-                "uploads",
-                folderName);
+            if (file.Length > MaxBytes)
+                throw new InvalidOperationException("Файлът е твърде голям (макс 5MB).");
 
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
+            var ext = Path.GetExtension(file.FileName);
+            if (string.IsNullOrWhiteSpace(ext) || !AllowedExt.Contains(ext))
+                throw new InvalidOperationException("Позволени формати: JPG, PNG, WEBP.");
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            folder = folder.Trim().TrimStart('~').TrimStart('/').TrimEnd('/');
 
-            var filePath = Path.Combine(uploadsFolder, fileName);
+            var root = _env.WebRootPath;
+            var physicalFolder = Path.Combine(root, folder);
+            Directory.CreateDirectory(physicalFolder);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            var fileName = $"{Guid.NewGuid():N}{ext.ToLowerInvariant()}";
+            var physicalPath = Path.Combine(physicalFolder, fileName);
+
+            await using (var stream = new FileStream(physicalPath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            return $"/uploads/{folderName}/{fileName}";
+            TryDeleteOld(oldRelativePath);
+            return "/" + folder.Replace("\\", "/") + "/" + fileName;
         }
 
-        public void DeleteFile(string? filePath)
+        private void TryDeleteOld(string? oldRelativePath)
         {
-            if (string.IsNullOrEmpty(filePath))
-                return;
-
-            var fullPath = Path.Combine(
-                _environment.WebRootPath,
-                filePath.TrimStart('/'));
-
-            if (File.Exists(fullPath))
+            try
             {
-                File.Delete(fullPath);
+                if (string.IsNullOrWhiteSpace(oldRelativePath)) return;
+                var rel = oldRelativePath.TrimStart('/');
+                var full = Path.Combine(_env.WebRootPath, rel);
+                if (File.Exists(full)) File.Delete(full);
+            }
+            catch
+            {
+                //ignore
             }
         }
     }

@@ -1,11 +1,11 @@
 ﻿using AutoSchoolProject.Data;
 using AutoSchoolProject.Models;
 using AutoSchoolProject.Models.Enums;
+using AutoSchoolProject.Services.Interfaces;
 using AutoSchoolProject.ViewModels.Student;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using AutoSchoolProject.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AutoSchoolProject.Services
 {
@@ -33,7 +33,7 @@ namespace AutoSchoolProject.Services
         {
             var student = await GetStudentAsync(user);
 
-            int completedLessons = student.ScheduledLessons.Count(l => l.Completed);
+            int completedLessons = student.ScheduledLessons?.Count(l => l.Completed) ?? 0;
             var required = student.Course?.RequiredPracticeLessons ?? 31;
 
             return new StudentProfileViewModel
@@ -43,7 +43,34 @@ namespace AutoSchoolProject.Services
                 PhoneNumber = student.User.PhoneNumber,
                 CourseName = student.Course?.Name,
                 CompletedLessons = completedLessons,
-                RemainingLessons = Math.Max(0, required - completedLessons)
+                RemainingLessons = Math.Max(0, required - completedLessons),
+                ProfileImagePath = student.User.ProfileImagePath
+            };
+        }
+
+        public async Task<EditStudentProfileViewModel> GetEditProfileAsync(ClaimsPrincipal user)
+        {
+            var student = await GetStudentAsync(user);
+
+            var courses = await _context.Courses
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.Name} - {c.Price:F2} лв"
+                })
+                .ToListAsync();
+
+            return new EditStudentProfileViewModel
+            {
+                FirstName = student.User.FirstName ?? string.Empty,
+                LastName = student.User.LastName ?? string.Empty,
+                Email = student.User.Email ?? string.Empty,
+                PhoneNumber = student.User.PhoneNumber,
+                CourseId = student.CourseId,
+                Courses = courses,
+                CurrentProfileImagePath = student.User.ProfileImagePath
             };
         }
 
@@ -59,7 +86,49 @@ namespace AutoSchoolProject.Services
 
             student.CourseId = model.CourseId;
 
+            if (!string.IsNullOrWhiteSpace(model.ProfileImagePath))
+                student.User.ProfileImagePath = model.ProfileImagePath;
+
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<InstructorListViewModel>> GetInstructorsAsync()
+        {
+            return await _context.Instructors
+                .Include(i => i.User)
+                .Include(i => i.Course)
+                .OrderBy(i => i.User.FirstName)
+                .ThenBy(i => i.User.LastName)
+                .Select(i => new InstructorListViewModel
+                {
+                    Id = i.Id,
+                    FullName = i.User.FirstName + " " + i.User.LastName,
+                    PhoneNumber = i.User.PhoneNumber,
+                    Email = i.User.Email,
+                    CourseName = i.Course != null ? i.Course.Name : "—",
+                    Category = i.Course != null ? i.Course.Name : "—"
+                })
+                .ToListAsync();
+        }
+
+        public async Task<InstructorDetailsViewModel> GetInstructorDetailsAsync(int instructorId)
+        {
+            var instructor = await _context.Instructors
+                .Include(i => i.User)
+                .Include(i => i.Course)
+                .FirstAsync(i => i.Id == instructorId);
+
+            return new InstructorDetailsViewModel
+            {
+                InstructorId = instructor.Id,
+                FullName = instructor.User.FirstName + " " + instructor.User.LastName,
+                Email = instructor.User.Email,
+                PhoneNumber = instructor.User.PhoneNumber,
+                SchoolName = "Autoschool Lucky-Cars EOOD",
+                ProfileImagePath = instructor.User.ProfileImagePath,
+                CarModel = instructor.CarModel,
+                CarImagePath = instructor.CarImagePath
+            };
         }
 
         public async Task<BookLessonViewModel> GetBookLessonAsync(ClaimsPrincipal user, int instructorId)
@@ -77,7 +146,8 @@ namespace AutoSchoolProject.Services
                             && l.StudentId == null
                             && l.Status == LessonStatus.Available
                             && l.DateTime >= now
-                            && (!student.CourseId.HasValue || l.CourseId == student.CourseId))
+                            // ако слотът е без категория (CourseId == null) – приемаме, че важи за всички
+                            && (!student.CourseId.HasValue || l.CourseId == null || l.CourseId == student.CourseId))
                 .OrderBy(l => l.DateTime)
                 .Take(50)
                 .Select(l => new SelectListItem
@@ -137,39 +207,6 @@ namespace AutoSchoolProject.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<InstructorListViewModel>> GetInstructorsAsync()
-        {
-            return await _context.Instructors
-                .Include(i => i.User)
-                .Include(i => i.Course)
-                .Select(i => new InstructorListViewModel
-                {
-                    Id = i.Id,
-                    FullName = i.User.FirstName + " " + i.User.LastName,
-                    PhoneNumber = i.User.PhoneNumber,
-                    Email = i.User.Email,
-                    CourseName = i.Course.Name
-                })
-                .ToListAsync();
-        }
-
-        public async Task<InstructorDetailsViewModel> GetInstructorDetailsAsync(int instructorId)
-        {
-            var instructor = await _context.Instructors
-                .Include(i => i.User)
-                .Include(i => i.Course)
-                .FirstAsync(i => i.Id == instructorId);
-
-            return new InstructorDetailsViewModel
-            {
-                InstructorId = instructor.Id,
-                FullName = instructor.User.FirstName + " " + instructor.User.LastName,
-                Email = instructor.User.Email,
-                PhoneNumber = instructor.User.PhoneNumber,
-                SchoolName = "Autoschool Lucky-Cars EOOD"
-            };
-        }
-
         public async Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId, DateTime start, DateTime end)
         {
             return await _context.PracticeLessons
@@ -178,20 +215,6 @@ namespace AutoSchoolProject.Services
                     && l.Status != LessonStatus.Cancelled
                     && l.Status != LessonStatus.Rejected)
                 .ToListAsync();
-        }
-
-        public async Task<EditStudentProfileViewModel> GetEditProfileAsync(ClaimsPrincipal user)
-        {
-            var student = await GetStudentAsync(user);
-
-            return new EditStudentProfileViewModel
-            {
-                FirstName = student.User.FirstName,
-                LastName = student.User.LastName,
-                Email = student.User.Email,
-                PhoneNumber = student.User.PhoneNumber,
-                CourseId = student.CourseId ?? 0
-            };
         }
 
         public async Task<List<MyLessonListItemViewModel>> GetMyLessonsAsync(ClaimsPrincipal user)
@@ -258,7 +281,6 @@ namespace AutoSchoolProject.Services
             };
         }
 
-
         public async Task<StudentScheduleViewModel> GetScheduleAsync(ClaimsPrincipal user)
         {
             var student = await GetStudentAsync(user);
@@ -301,12 +323,12 @@ namespace AutoSchoolProject.Services
                 Theory = theory
             };
         }
+
         public async Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId)
         {
             return await _context.PracticeLessons
                 .Where(l => l.InstructorId == instructorId)
                 .ToListAsync();
         }
-
     }
 }

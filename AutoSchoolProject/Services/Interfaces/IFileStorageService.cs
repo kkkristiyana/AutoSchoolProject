@@ -1,8 +1,10 @@
-﻿namespace AutoSchoolProject.Services.Interfaces
+﻿using Microsoft.AspNetCore.Http;
+
+namespace AutoSchoolProject.Services.Interfaces
 {
     public interface IFileStorageService
     {
-        Task<string?> SaveFileAsync(IFormFile file, string folderName);
-        void DeleteFile(string? filePath);
+        Task<string> SaveImageAsync(IFormFile file, string folder, string? oldRelativePath = null);
     }
 }
+

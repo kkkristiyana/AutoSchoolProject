@@ -6,9 +6,9 @@ namespace AutoSchoolProject.Models
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
-
-        public Instructor Instructor { get; set; }
-        public Student Student { get; set; }
         public string? ProfileImagePath { get; set; }
+
+        public Instructor? Instructor { get; set; }
+        public Student? Student { get; set; }
     }
 }

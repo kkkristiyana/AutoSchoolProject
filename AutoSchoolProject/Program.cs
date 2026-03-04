@@ -14,7 +14,6 @@ namespace AutoSchoolProject
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -30,12 +29,12 @@ namespace AutoSchoolProject
             .AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IEmailSender, DummyEmailSender>();
+            builder.Services.AddScoped<IFileStorageService, FileStorageService>();
             builder.Services.AddScoped<StudentService>();
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<InstructorService>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
-            builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 
             var app = builder.Build();
 

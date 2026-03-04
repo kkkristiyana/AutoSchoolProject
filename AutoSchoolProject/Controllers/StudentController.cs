@@ -1,23 +1,21 @@
-﻿using AutoSchoolProject.Models;
-using AutoSchoolProject.Services;
+﻿using AutoSchoolProject.Data;
 using AutoSchoolProject.Services.Interfaces;
 using AutoSchoolProject.ViewModels.Student;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 [Authorize(Roles = "Student")]
 public class StudentController : Controller
 {
     private readonly IStudentService _studentService;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ApplicationDbContext _context;
     private readonly IFileStorageService _fileStorage;
 
-    public StudentController(IStudentService studentService, UserManager<ApplicationUser> userManager,IFileStorageService fileStorage)
+    public StudentController(IStudentService studentService, ApplicationDbContext context, IFileStorageService fileStorage)
     {
         _studentService = studentService;
-        _userManager = userManager;
+        _context = context;
         _fileStorage = fileStorage;
     }
 
@@ -30,46 +28,38 @@ public class StudentController : Controller
     [HttpGet]
     public async Task<IActionResult> EditProfile()
     {
-        var user = await _userManager.GetUserAsync(User);
-
-        var model = new EditStudentProfileViewModel
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            PhoneNumber = user.PhoneNumber,
-            ExistingProfileImagePath = user.ProfileImagePath
-        };
-
+        var model = await _studentService.GetEditProfileAsync(User);
         return View(model);
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditProfile(EditStudentProfileViewModel model)
     {
         if (!ModelState.IsValid)
+        {
+            var refreshed = await _studentService.GetEditProfileAsync(User);
+            model.Courses = refreshed.Courses;
+            model.CurrentProfileImagePath = refreshed.CurrentProfileImagePath;
             return View(model);
-
-        var user = await _userManager.GetUserAsync(User);
-
-        user.FirstName = model.FirstName;
-        user.LastName = model.LastName;
-        user.PhoneNumber = model.PhoneNumber;
+        }
 
         if (model.ProfileImage != null)
         {
-            //изтриваме старата
-            _fileStorage.DeleteFile(user.ProfileImagePath);
-
-            //записваме новата
-            var path = await _fileStorage.SaveFileAsync(model.ProfileImage, "profile");
-
-            user.ProfileImagePath = path;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                var newPath = await _fileStorage.SaveImageAsync(model.ProfileImage, "uploads/profile", user.ProfileImagePath);
+                model.ProfileImagePath = newPath;
+            }
         }
 
-        await _userManager.UpdateAsync(user);
-
+        await _studentService.UpdateProfileAsync(User, model);
+        TempData["Success"] = "Профилът е обновен.";
         return RedirectToAction(nameof(Profile));
     }
+
     public async Task<IActionResult> Instructors()
     {
         var model = await _studentService.GetInstructorsAsync();
@@ -82,6 +72,7 @@ public class StudentController : Controller
         return View(model);
     }
 
+    [HttpGet]
     public async Task<IActionResult> BookLesson(int instructorId)
     {
         var model = await _studentService.GetBookLessonAsync(User, instructorId);
@@ -89,6 +80,7 @@ public class StudentController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> BookLesson(BookLessonViewModel model)
     {
         if (!ModelState.IsValid)
@@ -102,6 +94,7 @@ public class StudentController : Controller
         try
         {
             await _studentService.BookLessonAsync(User, model);
+            TempData["Success"] = "Часът е запазен.";
             return RedirectToAction(nameof(MyLessons));
         }
         catch (InvalidOperationException ex)
@@ -166,6 +159,7 @@ public class StudentController : Controller
         var model = await _studentService.GetScheduleAsync(User);
         return View(model);
     }
+
     [HttpGet]
     public async Task<IActionResult> GetInstructorLessons(int instructorId)
     {
@@ -181,5 +175,4 @@ public class StudentController : Controller
 
         return Json(result);
     }
-
 }

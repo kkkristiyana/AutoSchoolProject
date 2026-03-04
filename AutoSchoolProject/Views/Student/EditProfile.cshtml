@@ -1,57 +1,72 @@
 ﻿@model AutoSchoolProject.ViewModels.Student.EditStudentProfileViewModel
 
-<h2>Редакция на профил</h2>
+@{
+    ViewData["Title"] = "Редакция на профил";
+    var hasImg = !string.IsNullOrWhiteSpace(Model.CurrentProfileImagePath);
+}
 
-<form asp-action="EditProfile" method="post">
-    <div class="form-group">
-        <label asp-for="FirstName"></label>
+<h2 class="mb-3">✏️ Редакция на профил</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="EditProfile" method="post" enctype="multipart/form-data" class="card shadow-sm p-3">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Профилна снимка</label>
+        <div class="d-flex align-items-center gap-3">
+            @if (hasImg)
+            {
+                <img src="@Model.CurrentProfileImagePath" alt="Профилна" style="width:72px;height:72px;object-fit:cover;border-radius:50%;" />
+            }
+            else
+            {
+                <div style="width:72px;height:72px;border-radius:50%;background:#e9ecef;"></div>
+            }
+            <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*" />
+        </div>
+        <span asp-validation-for="ProfileImage" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="FirstName" class="form-label"></label>
         <input asp-for="FirstName" class="form-control" />
         <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="LastName"></label>
+    <div class="mb-3">
+        <label asp-for="LastName" class="form-label"></label>
         <input asp-for="LastName" class="form-control" />
         <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="Email"></label>
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="PhoneNumber"></label>
+    <div class="mb-3">
+        <label asp-for="PhoneNumber" class="form-label"></label>
         <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="CourseId">Категория</label>
-        <select asp-for="CourseId" class="form-control">
-            <option value="1">B</option>
-            <option value="2">C</option>
-            <option value="3">D</option>
+    <div class="mb-3">
+        <label asp-for="CourseId" class="form-label"></label>
+        <select asp-for="CourseId" asp-items="Model.Courses" class="form-select">
+            <option value="">-- Избери категория --</option>
         </select>
-    </div>
-    <div>
-        <label>Снимка на профила</label>
-        <input style="display:block" asp-for="ProfileImage" type="file" />
+        <span asp-validation-for="CourseId" class="text-danger"></span>
     </div>
 
-    @if (Model.ExistingProfileImagePath != null)
-    {
-        <div>
-            <img src="@Model.ExistingProfileImagePath" width="150" />
-        </div>
-    }
-
-    <button type="submit" class="btn btn-primary mt-2">
-        Запази
-    </button>
+    <button type="submit" class="btn btn-primary">Запази</button>
+    <a asp-action="Profile" class="btn btn-outline-secondary ms-2">Назад</a>
 </form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-

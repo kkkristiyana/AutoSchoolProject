@@ -16,7 +16,7 @@ namespace AutoSchoolProject.Services
             _context = context;
         }
 
-        public InstructorDetailsViewModel GetInstructorDetails(int instructorId)
+        public InstructorDetailsViewModel? GetInstructorDetails(int instructorId)
         {
             var instructor = _context.Instructors
                 .Include(i => i.User)
@@ -31,9 +31,13 @@ namespace AutoSchoolProject.Services
                 FullName = $"{instructor.User.FirstName} {instructor.User.LastName}",
                 Email = instructor.User.Email,
                 PhoneNumber = instructor.User.PhoneNumber,
-                Car = "Toyota Yaris (Manual)"
+                SchoolName = "Автошкола Lucky-Cars EOOD",
+                ProfileImagePath = instructor.User.ProfileImagePath,
+                CarModel = instructor.CarModel,
+                CarImagePath = instructor.CarImagePath
             };
         }
+
         private async Task<Instructor> GetInstructorAsync(ClaimsPrincipal user)
         {
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -42,6 +46,7 @@ namespace AutoSchoolProject.Services
                 .Include(i => i.User)
                 .FirstAsync(i => i.UserId == userId);
         }
+
         public async Task<InstructorDashboardViewModel> GetDashboardAsync(ClaimsPrincipal user)
         {
             var instructor = await GetInstructorAsync(user);

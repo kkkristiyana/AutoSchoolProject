@@ -2,24 +2,44 @@
 
 @{
     ViewData["Title"] = "Детайли за инструктор";
+    var hasProfile = !string.IsNullOrWhiteSpace(Model.ProfileImagePath);
+    var hasCar = !string.IsNullOrWhiteSpace(Model.CarImagePath);
 }
 
 <h2 class="mb-3">@Model.FullName</h2>
 
 <div class="card">
     <div class="card-body">
-        <p><strong>Автошкола:</strong> @Model.SchoolName</p>
-        <p><strong>Имейл:</strong> @Model.Email</p>
-        <p><strong>Телефон:</strong> @Model.PhoneNumber</p>
+        <div class="d-flex gap-3 align-items-start mb-3">
+            @if (hasProfile)
+            {
+                <img src="@Model.ProfileImagePath" alt="Профилна" style="width:88px;height:88px;object-fit:cover;border-radius:50%;" />
+            }
+            <div>
+                <p class="mb-1"><strong>Автошкола:</strong> @Model.SchoolName</p>
+                <p class="mb-1"><strong>Имейл:</strong> @Model.Email</p>
+                <p class="mb-1"><strong>Телефон:</strong> @Model.PhoneNumber</p>
+                @if (!string.IsNullOrWhiteSpace(Model.CarModel))
+                {
+                    <p class="mb-0"><strong>Кола:</strong> @Model.CarModel</p>
+                }
+            </div>
+        </div>
+
+        @if (hasCar)
+        {
+            <div class="mb-3">
+                <div class="fw-bold mb-1">Кола</div>
+                <img src="@Model.CarImagePath" alt="Кола" style="max-width:100%;height:auto;border-radius:12px;" />
+            </div>
+        }
 
         <div class="mt-3">
-            <a class="btn btn-success"
-               asp-controller="Student" asp-action="BookLesson" asp-route-instructorId="@Model.InstructorId">
+            <a class="btn btn-success" asp-controller="Student" asp-action="BookLesson" asp-route-instructorId="@Model.InstructorId">
                 Запази час
             </a>
 
-            <a class="btn btn-outline-secondary"
-               asp-controller="Student" asp-action="Instructors">
+            <a class="btn btn-outline-secondary" asp-controller="Student" asp-action="Instructors">
                 Назад
             </a>
         </div>
