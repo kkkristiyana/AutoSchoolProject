@@ -5,6 +5,11 @@
 
 <h2 class="mb-3">🧑‍🏫 Инструктори</h2>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -13,17 +18,30 @@
             <th>Телефон</th>
             <th>Категория</th>
             <th>Approved (предстоящи)</th>
+            <th class="text-end">Действия</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var i in Model)
         {
             <tr>
-                <td>@i.FullName</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        @if (!string.IsNullOrWhiteSpace(i.ProfileImagePath))
+                        {
+                            <img src="@i.ProfileImagePath" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" />
+                        }
+                        <span>@i.FullName</span>
+                    </div>
+                </td>
                 <td>@i.Email</td>
                 <td>@i.PhoneNumber</td>
                 <td>@i.CourseName</td>
                 <td>@i.UpcomingApprovedLessons</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary"
+                       asp-area="Admin" asp-controller="Instructors" asp-action="Edit" asp-route-id="@i.Id">Редакция</a>
+                </td>
             </tr>
         }
     </tbody>

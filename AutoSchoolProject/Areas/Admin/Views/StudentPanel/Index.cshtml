@@ -1,0 +1,69 @@
+﻿@model AutoSchoolProject.ViewModels.Admin.StudentPanelIndexViewModel
+
+@{
+    ViewData["Title"] = "Admin Student Panel";
+}
+
+<h2 class="mb-3">🧩 Admin Student Panel</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-6">
+        <input class="form-control" name="q" value="@Model.Query" placeholder="Търси по име / имейл / телефон" />
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Търси</button>
+    </div>
+    <div class="col-md-2">
+        <a class="btn btn-outline-secondary w-100" asp-area="Admin" asp-controller="StudentPanel" asp-action="Index">Изчисти</a>
+    </div>
+    <div class="col-md-2">
+        <a class="btn btn-outline-secondary w-100" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+    </div>
+</form>
+
+@if (!Model.Students.Any())
+{
+    <div class="alert alert-info">Няма намерени ученици.</div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Ученик</th>
+                <th>Имейл</th>
+                <th>Телефон</th>
+                <th>Категория</th>
+                <th class="text-end">Панел</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Students)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (!string.IsNullOrWhiteSpace(s.ProfileImagePath))
+                            {
+                                <img src="@s.ProfileImagePath" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
+                            }
+                            <div>
+                                <div class="fw-semibold">@s.FullName</div>
+                                <div class="small text-muted">ID: @s.StudentId</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>@s.Email</td>
+                    <td>@s.PhoneNumber</td>
+                    <td>@s.CourseName</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-primary"
+                           asp-area="Admin" asp-controller="StudentPanel" asp-action="Profile" asp-route-studentId="@s.StudentId">
+                            Влез в панела
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

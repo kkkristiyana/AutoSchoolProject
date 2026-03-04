@@ -1,0 +1,28 @@
+﻿@model AutoSchoolProject.ViewModels.Admin.AdminCourseRowViewModel
+@{
+    ViewData["Title"] = "Изтриване на курс";
+}
+
+<h2 class="mb-3">🗑️ Изтриване на курс</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="card shadow-sm p-3">
+    <p>Сигурен ли си, че искаш да изтриеш курс <strong>@Model.Name</strong>?</p>
+
+    <ul class="mb-3">
+        <li>Цена: <strong>@Model.Price.ToString("F2") лв</strong></li>
+        <li>Задължителни часове: <strong>@Model.RequiredPracticeLessons</strong></li>
+        <li>Ученици: <strong>@Model.StudentsCount</strong></li>
+        <li>Инструктори: <strong>@Model.InstructorsCount</strong></li>
+    </ul>
+
+    <form asp-area="Admin" asp-controller="Courses" asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Да, изтрий</button>
+        <a class="btn btn-outline-secondary ms-2" asp-area="Admin" asp-controller="Courses" asp-action="Index">Отказ</a>
+    </form>
+</div>

@@ -1,0 +1,58 @@
+﻿@model AutoSchoolProject.ViewModels.Student.BookLessonViewModel
+
+@{
+    ViewData["Title"] = "Запази час (Admin Student Panel)";
+    int studentId = ViewBag.StudentId is int v ? v : 0;
+}
+
+<partial name="_StudentPanelNav" />
+
+<h3 class="mb-3">📅 Запази час</h3>
+
+<div class="alert alert-secondary">
+    Инструктор: <strong>@Model.InstructorName</strong>
+</div>
+
+@if (ViewData.ModelState.ErrorCount > 0)
+{
+    <div class="alert alert-danger">
+        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@err.ErrorMessage</div>
+        }
+    </div>
+}
+
+@if (Model.AvailableSlots == null || !Model.AvailableSlots.Any())
+{
+    <div class="alert alert-info">
+        Няма свободни слотове за записване към момента.
+    </div>
+
+    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="StudentPanel" asp-action="Instructors" asp-route-studentId="@studentId">← Назад</a>
+}
+else
+{
+    <form asp-area="Admin" asp-controller="StudentPanel" asp-action="BookLesson" asp-route-studentId="@studentId" method="post" class="card shadow-sm p-3">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="InstructorId" />
+        <input type="hidden" asp-for="StudentId" />
+        <input type="hidden" asp-for="CourseId" />
+
+        <div class="mb-3">
+            <label asp-for="SlotId" class="form-label">Свободен час</label>
+            <select asp-for="SlotId" asp-items="Model.AvailableSlots" class="form-select">
+                <option value="">-- Избери свободен час --</option>
+            </select>
+            <span asp-validation-for="SlotId" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">✅ Запази</button>
+        <a class="btn btn-outline-secondary ms-2" asp-area="Admin" asp-controller="StudentPanel" asp-action="Instructors" asp-route-studentId="@studentId">Назад</a>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

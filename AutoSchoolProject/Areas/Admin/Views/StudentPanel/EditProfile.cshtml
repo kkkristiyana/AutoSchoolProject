@@ -1,0 +1,71 @@
+﻿@model AutoSchoolProject.ViewModels.Student.EditStudentProfileViewModel
+
+@{
+    ViewData["Title"] = "Редакция на профил (Admin Student Panel)";
+    var hasImg = !string.IsNullOrWhiteSpace(Model.CurrentProfileImagePath);
+    int studentId = ViewBag.StudentId is int v ? v : 0;
+}
+
+<partial name="_StudentPanelNav" />
+
+<h3 class="mb-3">✏️ Редакция на профил</h3>
+
+<form asp-area="Admin" asp-controller="StudentPanel" asp-action="EditProfile" asp-route-studentId="@studentId"
+      method="post" enctype="multipart/form-data" class="card shadow-sm p-3">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Профилна снимка</label>
+        <div class="d-flex align-items-center gap-3">
+            @if (hasImg)
+            {
+                <img src="@Model.CurrentProfileImagePath" alt="Профилна" style="width:72px;height:72px;object-fit:cover;border-radius:50%;" />
+            }
+            else
+            {
+                <div style="width:72px;height:72px;border-radius:50%;background:#e9ecef;"></div>
+            }
+            <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*" />
+        </div>
+        <span asp-validation-for="ProfileImage" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="FirstName" class="form-label"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="LastName" class="form-label"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PhoneNumber" class="form-label"></label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CourseId" class="form-label"></label>
+        <select asp-for="CourseId" asp-items="Model.Courses" class="form-select">
+            <option value="">-- Избери категория --</option>
+        </select>
+        <span asp-validation-for="CourseId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Запази</button>
+    <a asp-area="Admin" asp-controller="StudentPanel" asp-action="Profile" asp-route-studentId="@studentId" class="btn btn-outline-secondary ms-2">Назад</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

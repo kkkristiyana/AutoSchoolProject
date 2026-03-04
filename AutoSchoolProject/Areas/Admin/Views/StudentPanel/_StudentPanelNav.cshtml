@@ -1,0 +1,27 @@
+﻿@{
+    int studentId = ViewBag.StudentId is int v ? v : 0;
+    string studentName = ViewBag.StudentName as string ?? "—";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+        <div class="small text-muted">Admin Student Panel</div>
+        <div class="h5 mb-0">👨‍🎓 @studentName</div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-primary"
+           asp-area="Admin" asp-controller="StudentPanel" asp-action="Profile" asp-route-studentId="@studentId">Профил</a>
+        <a class="btn btn-outline-primary"
+           asp-area="Admin" asp-controller="StudentPanel" asp-action="Schedule" asp-route-studentId="@studentId">График</a>
+        <a class="btn btn-outline-primary"
+           asp-area="Admin" asp-controller="StudentPanel" asp-action="MyLessons" asp-route-studentId="@studentId">Моите часове</a>
+        <a class="btn btn-outline-primary"
+           asp-area="Admin" asp-controller="StudentPanel" asp-action="TestResults" asp-route-studentId="@studentId">Тестове</a>
+        <a class="btn btn-outline-success"
+           asp-area="Admin" asp-controller="StudentPanel" asp-action="Instructors" asp-route-studentId="@studentId">Запази час</a>
+    </div>
+
+    <a class="btn btn-outline-secondary"
+       asp-area="Admin" asp-controller="StudentPanel" asp-action="Index">← Списък ученици</a>
+</div>

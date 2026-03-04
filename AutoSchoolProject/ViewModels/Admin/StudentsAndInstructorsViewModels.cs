@@ -8,6 +8,7 @@
         public string? PhoneNumber { get; set; }
         public string? CourseName { get; set; }
         public int LessonsCount { get; set; }
+        public string? ProfileImagePath { get; set; }
     }
 
     public class InstructorRowViewModel
@@ -18,5 +19,7 @@
         public string? PhoneNumber { get; set; }
         public string? CourseName { get; set; }
         public int UpcomingApprovedLessons { get; set; }
+        public string? ProfileImagePath { get; set; }
+        public string? CarImagePath { get; set; }
     }
 }

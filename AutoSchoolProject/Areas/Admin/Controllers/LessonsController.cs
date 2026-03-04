@@ -1,8 +1,10 @@
 ﻿using AutoSchoolProject.Data;
+using AutoSchoolProject.Models;
 using AutoSchoolProject.Models.Enums;
 using AutoSchoolProject.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoSchoolProject.Areas.Admin.Controllers
@@ -49,6 +51,69 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             return View(lessons);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> CreateSlot()
+        {
+            var vm = new CreateAvailableSlotViewModel
+            {
+                Instructors = await GetInstructorSelectListAsync(),
+                Courses = await GetCourseSelectListAsync()
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateSlot(CreateAvailableSlotViewModel model)
+        {
+            if (model.DateTime < DateTime.Now)
+                ModelState.AddModelError(nameof(model.DateTime), "Не можеш да създаваш слот в миналото.");
+
+            if (!ModelState.IsValid)
+            {
+                model.Instructors = await GetInstructorSelectListAsync();
+                model.Courses = await GetCourseSelectListAsync();
+                return View(model);
+            }
+
+            var start = model.DateTime;
+            var end = model.DateTime.AddMinutes(model.DurationMinutes);
+
+            bool overlaps = await _context.PracticeLessons.AnyAsync(l =>
+                l.InstructorId == model.InstructorId &&
+                l.Status != LessonStatus.Cancelled &&
+                l.Status != LessonStatus.Rejected &&
+                l.DateTime < end &&
+                start < l.DateTime.AddMinutes(l.DurationMinutes));
+
+            if (overlaps)
+            {
+                ModelState.AddModelError("", "Има припокриване с друг час за този инструктор.");
+                model.Instructors = await GetInstructorSelectListAsync();
+                model.Courses = await GetCourseSelectListAsync();
+                return View(model);
+            }
+
+            var slot = new PracticeLesson
+            {
+                InstructorId = model.InstructorId,
+                StudentId = null,
+                CourseId = model.CourseId,
+                DateTime = model.DateTime,
+                DurationMinutes = model.DurationMinutes,
+                Status = LessonStatus.Available,
+                Completed = false,
+                Note = string.IsNullOrWhiteSpace(model.Note) ? "Свободен слот" : model.Note
+            };
+
+            _context.PracticeLessons.Add(slot);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Слотът е създаден.";
+            return RedirectToAction(nameof(Index), new { status = LessonStatus.Available.ToString() });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(int id)
@@ -83,6 +148,35 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             lesson.Status = LessonStatus.Cancelled;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<List<SelectListItem>> GetInstructorSelectListAsync()
+        {
+            return await _context.Instructors
+                .Include(i => i.User)
+                .Include(i => i.Course)
+                .AsNoTracking()
+                .OrderBy(i => i.User.FirstName)
+                .ThenBy(i => i.User.LastName)
+                .Select(i => new SelectListItem
+                {
+                    Value = i.Id.ToString(),
+                    Text = $"{i.User.FirstName} {i.User.LastName} ({(i.Course != null ? i.Course.Name : "без категория")})"
+                })
+                .ToListAsync();
+        }
+
+        private async Task<List<SelectListItem>> GetCourseSelectListAsync()
+        {
+            return await _context.Courses
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                })
+                .ToListAsync();
         }
     }
 }

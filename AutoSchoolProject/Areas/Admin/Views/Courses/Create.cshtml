@@ -1,0 +1,35 @@
+﻿@model AutoSchoolProject.ViewModels.Admin.AdminCourseFormViewModel
+@{
+    ViewData["Title"] = "Нов курс";
+}
+
+<h2 class="mb-3">➕ Нов курс</h2>
+
+<form asp-area="Admin" asp-controller="Courses" asp-action="Create" method="post" class="card shadow-sm p-3">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="RequiredPracticeLessons" class="form-label"></label>
+        <input asp-for="RequiredPracticeLessons" class="form-control" />
+        <span asp-validation-for="RequiredPracticeLessons" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Създай</button>
+    <a class="btn btn-outline-secondary ms-2" asp-area="Admin" asp-controller="Courses" asp-action="Index">Назад</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
