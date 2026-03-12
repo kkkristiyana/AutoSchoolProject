@@ -14,7 +14,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
+                
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,6 +25,24 @@
                     <ul class="navbar-nav flex-grow-1">
                         @if (User.Identity.IsAuthenticated == false)
                         {
+                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="IndexForViewerOnly">AutoSchoolProject</a>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="IndexForViewerOnly">Начало</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Conditions">Условия</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Contacts">Контакти</a>
+                            </li>
+
+                        }
+                        @if (User.Identity.IsAuthenticated == true && User.IsInRole(""))
+                        {
+                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Начало</a>
                             </li>
@@ -42,9 +60,9 @@
                             </li>
 
                         }
-                        
-                        @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Student"))
+                        @if (User.Identity != null && User.IsInRole("Student"))
                         {
+                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Student" asp-action="Profile">👤 Моят профил</a>
                             </li>
@@ -64,6 +82,7 @@
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Instructor"))
                         {
+                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Instructor" asp-action="Index">🧑‍🏫 Инструктор</a>
                             </li>
@@ -72,6 +91,7 @@
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                         {
+                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin</a>
                             </li>

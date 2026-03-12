@@ -21,8 +21,18 @@ namespace AutoSchoolProject.Controllers
         }
 
         public IActionResult Index() => View();
+        public IActionResult IndexForViewerOnly() => View();
 
         public async Task<IActionResult> Courses()
+        {
+            var courses = await _context.Courses
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            return View(courses);
+        }
+        public async Task<IActionResult> CoursesInfoOnly()
         {
             var courses = await _context.Courses
                 .AsNoTracking()

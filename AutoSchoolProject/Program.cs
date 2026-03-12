@@ -64,7 +64,7 @@ namespace AutoSchoolProject
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Home}/{action=IndexForViewerOnly}/{id?}");
             app.MapRazorPages();
 
             using (var scope = app.Services.CreateScope())
