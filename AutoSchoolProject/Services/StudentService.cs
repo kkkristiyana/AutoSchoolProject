@@ -35,16 +35,24 @@ namespace AutoSchoolProject.Services
 
             int completedLessons = student.ScheduledLessons?.Count(l => l.Completed) ?? 0;
             var required = student.Course?.RequiredPracticeLessons ?? 31;
+            var adminMessage = await _context.EnrollmentRequests
+                .Where(r => r.CreatedStudentUserId == student.UserId
+                            && r.Status == RequestStatus.Approved
+                            && !string.IsNullOrWhiteSpace(r.AdminNote))
+                .OrderByDescending(r => r.ProcessedAt ?? r.CreatedAt)
+                .Select(r => r.AdminNote)
+                .FirstOrDefaultAsync();
 
             return new StudentProfileViewModel
             {
-                FullName = $"{student.User.FirstName} {student.User.LastName}",
+                FullName = $"{student.User.FirstName} {student.User.LastName}".Trim(),
                 Email = student.User.Email,
                 PhoneNumber = student.User.PhoneNumber,
                 CourseName = student.Course?.Name,
                 CompletedLessons = completedLessons,
                 RemainingLessons = Math.Max(0, required - completedLessons),
-                ProfileImagePath = student.User.ProfileImagePath
+                ProfileImagePath = student.User.ProfileImagePath,
+                AdminMessage = adminMessage
             };
         }
 
@@ -146,7 +154,6 @@ namespace AutoSchoolProject.Services
                             && l.StudentId == null
                             && l.Status == LessonStatus.Available
                             && l.DateTime >= now
-                            // ако слотът е без категория (CourseId == null) – приемаме, че важи за всички
                             && (!student.CourseId.HasValue || l.CourseId == null || l.CourseId == student.CourseId))
                 .OrderBy(l => l.DateTime)
                 .Take(50)

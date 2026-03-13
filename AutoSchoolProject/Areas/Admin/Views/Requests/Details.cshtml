@@ -7,6 +7,11 @@
 
 <h2 class="mb-3">📄 Заявка #@Model.Id</h2>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
 <div class="card mb-3">
     <div class="card-body">
         <p class="mb-1"><strong>Име:</strong> @Model.FullName</p>
@@ -21,14 +26,19 @@
             <p class="mb-1"><strong>Обработена:</strong> @Model.ProcessedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
         }
 
-        @if (!string.IsNullOrWhiteSpace(Model.AdminNote))
-        {
-            <p class="mb-1"><strong>Бележка (Admin):</strong> @Model.AdminNote</p>
-        }
-
         @if (!string.IsNullOrWhiteSpace(Model.CreatedStudentEmail))
         {
-            <p class="mb-0"><strong>Създаден курсист:</strong> @Model.CreatedStudentEmail</p>
+            <p class="mb-1"><strong>Свързан потребител:</strong> @Model.CreatedStudentEmail</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.AssignedRole))
+        {
+            <p class="mb-1"><strong>Роля:</strong> @Model.AssignedRole</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.AdminNote))
+        {
+            <p class="mb-0"><strong>Бележка (Admin):</strong> @Model.AdminNote</p>
         }
     </div>
 </div>

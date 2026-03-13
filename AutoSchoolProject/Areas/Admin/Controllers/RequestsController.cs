@@ -5,6 +5,7 @@ using AutoSchoolProject.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoSchoolProject.Areas.Admin.Controllers
@@ -70,13 +71,18 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             if (req == null) return NotFound();
 
-            string? createdEmail = null;
+            string? linkedEmail = null;
+            string? assignedRole = null;
             if (!string.IsNullOrWhiteSpace(req.CreatedStudentUserId))
             {
-                createdEmail = await _context.Users
-                    .Where(u => u.Id == req.CreatedStudentUserId)
-                    .Select(u => u.Email)
-                    .FirstOrDefaultAsync();
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == req.CreatedStudentUserId);
+                if (user != null)
+                {
+                    linkedEmail = user.Email;
+                    var roles = await _userManager.GetRolesAsync(user);
+                    assignedRole = roles.FirstOrDefault(r => r == "Student" || r == "Instructor" || r == "Admin")
+                                   ?? roles.FirstOrDefault();
+                }
             }
 
             var vm = new EnrollmentRequestDetailsViewModel
@@ -92,7 +98,8 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 ProcessedAt = req.ProcessedAt,
                 AdminNote = req.AdminNote,
                 CreatedStudentUserId = req.CreatedStudentUserId,
-                CreatedStudentEmail = createdEmail
+                CreatedStudentEmail = linkedEmail,
+                AssignedRole = assignedRole
             };
 
             return View(vm);
@@ -109,13 +116,20 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             if (req.Status != RequestStatus.New)
                 return RedirectToAction(nameof(Details), new { id });
 
+            var linkedUser = !string.IsNullOrWhiteSpace(req.CreatedStudentUserId)
+                ? await _userManager.FindByIdAsync(req.CreatedStudentUserId)
+                : null;
+
             var vm = new ApproveEnrollmentRequestViewModel
             {
                 RequestId = req.Id,
                 FullName = req.FullName,
                 PhoneNumber = req.PhoneNumber,
                 CourseName = req.Course.Name,
-                PreferredStartDate = req.PreferredStartDate
+                PreferredStartDate = req.PreferredStartDate,
+                UserEmail = linkedUser?.Email ?? string.Empty,
+                SelectedRole = "Student",
+                AvailableRoles = GetAvailableRoleOptions()
             };
 
             return View(vm);
@@ -125,7 +139,10 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(ApproveEnrollmentRequestViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            model.AvailableRoles = GetAvailableRoleOptions();
+
+            if (!ModelState.IsValid)
+                return View(model);
 
             var req = await _context.EnrollmentRequests
                 .Include(r => r.Course)
@@ -139,64 +156,112 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var existing = await _userManager.FindByEmailAsync(model.Email);
-            if (existing != null)
+            if (string.IsNullOrWhiteSpace(req.CreatedStudentUserId))
             {
-                ModelState.AddModelError(nameof(model.Email), "Този email вече съществува.");
+                ModelState.AddModelError("", "Заявката не е свързана с влязъл потребител.");
                 return View(model);
             }
 
-            //split name -> FirstName/LastName
-            var parts = (req.FullName ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var firstName = parts.Length > 0 ? parts[0] : "Student";
-            var lastName = parts.Length > 1 ? string.Join(' ', parts.Skip(1)) : "User";
+            var user = await _userManager.FindByIdAsync(req.CreatedStudentUserId);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Свързаният потребител не беше намерен.");
+                return View(model);
+            }
 
-            //гарантираме роля Student
-            if (!await _roleManager.RoleExistsAsync("Student"))
-                await _roleManager.CreateAsync(new IdentityRole("Student"));
+            model.UserEmail = user.Email ?? user.UserName ?? string.Empty;
+
+            var parts = (req.FullName ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var firstName = parts.Length > 0 ? parts[0] : "User";
+            var lastName = parts.Length > 1 ? string.Join(' ', parts.Skip(1)) : string.Empty;
+
+            if (!await _roleManager.RoleExistsAsync(model.SelectedRole))
+                await _roleManager.CreateAsync(new IdentityRole(model.SelectedRole));
 
             await using var tx = await _context.Database.BeginTransactionAsync();
             try
             {
-                var user = new ApplicationUser
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    EmailConfirmed = true,
-                    PhoneNumber = req.PhoneNumber,
-                    FirstName = firstName,
-                    LastName = lastName
-                };
+                user.Email = model.UserEmail;
+                user.UserName = model.UserEmail;
+                user.EmailConfirmed = true;
+                user.PhoneNumber = req.PhoneNumber;
+                user.FirstName = firstName;
+                user.LastName = lastName;
 
-                var createRes = await _userManager.CreateAsync(user, model.Password);
-                if (!createRes.Succeeded)
+                var updateRes = await _userManager.UpdateAsync(user);
+                if (!updateRes.Succeeded)
                 {
-                    foreach (var e in createRes.Errors)
+                    foreach (var e in updateRes.Errors)
                         ModelState.AddModelError("", e.Description);
 
                     await tx.RollbackAsync();
                     return View(model);
                 }
 
-                var roleRes = await _userManager.AddToRoleAsync(user, "Student");
-                if (!roleRes.Succeeded)
+                foreach (var role in new[] { "Student", "Instructor" })
                 {
-                    foreach (var e in roleRes.Errors)
-                        ModelState.AddModelError("", e.Description);
+                    if (role != model.SelectedRole && await _userManager.IsInRoleAsync(user, role))
+                    {
+                        var removeRoleResult = await _userManager.RemoveFromRoleAsync(user, role);
+                        if (!removeRoleResult.Succeeded)
+                        {
+                            foreach (var e in removeRoleResult.Errors)
+                                ModelState.AddModelError("", e.Description);
 
-                    await tx.RollbackAsync();
-                    return View(model);
+                            await tx.RollbackAsync();
+                            return View(model);
+                        }
+                    }
                 }
 
-                //създаваме Student профил към курса от заявката
-                var student = new Student
+                if (!await _userManager.IsInRoleAsync(user, model.SelectedRole))
                 {
-                    UserId = user.Id,
-                    CourseId = req.CourseId
-                };
-                _context.Students.Add(student);
+                    var roleRes = await _userManager.AddToRoleAsync(user, model.SelectedRole);
+                    if (!roleRes.Succeeded)
+                    {
+                        foreach (var e in roleRes.Errors)
+                            ModelState.AddModelError("", e.Description);
 
-                //маркираме заявката
+                        await tx.RollbackAsync();
+                        return View(model);
+                    }
+                }
+
+                if (model.SelectedRole == "Student")
+                {
+                    var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == user.Id);
+                    if (student == null)
+                    {
+                        student = new Student
+                        {
+                            UserId = user.Id,
+                            CourseId = req.CourseId
+                        };
+                        _context.Students.Add(student);
+                    }
+                    else
+                    {
+                        student.CourseId = req.CourseId;
+                    }
+                }
+                else if (model.SelectedRole == "Instructor")
+                {
+                    var instructor = await _context.Instructors.FirstOrDefaultAsync(i => i.UserId == user.Id);
+                    if (instructor == null)
+                    {
+                        instructor = new Instructor
+                        {
+                            UserId = user.Id,
+                            CourseId = req.CourseId
+                        };
+                        _context.Instructors.Add(instructor);
+                    }
+                    else
+                    {
+                        instructor.CourseId = req.CourseId;
+                    }
+                }
+
                 req.Status = RequestStatus.Approved;
                 req.ProcessedAt = DateTime.UtcNow;
                 req.AdminNote = model.AdminNote;
@@ -205,6 +270,7 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
 
+                TempData["Success"] = "Заявката е одобрена и ролята е зададена към съществуващия потребител.";
                 return RedirectToAction(nameof(Details), new { id = req.Id });
             }
             catch
@@ -245,5 +311,11 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Details), new { id = model.RequestId });
         }
+
+        private static List<SelectListItem> GetAvailableRoleOptions() => new()
+        {
+            new SelectListItem { Value = "Student", Text = "Student" },
+            new SelectListItem { Value = "Instructor", Text = "Instructor" }
+        };
     }
 }

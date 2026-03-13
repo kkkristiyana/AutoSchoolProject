@@ -41,6 +41,17 @@
     </div>
 </div>
 
+
+@if (!string.IsNullOrWhiteSpace(Model.AdminMessage))
+{
+    <div class="card border-info shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-2">📩 Съобщение от администратора</h5>
+            <p class="mb-0">@Model.AdminMessage</p>
+        </div>
+    </div>
+}
+
 <div class="card shadow-sm">
     <div class="card-body">
         <h5 class="card-title">Напредък</h5>

@@ -28,29 +28,23 @@
             <input type="hidden" asp-for="PreferredStartDate" />
 
             <div class="mb-3">
-                <label asp-for="Email" class="form-label">Email (за вход)</label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <label asp-for="UserEmail" class="form-label">Имейл на потребителя</label>
+                <input asp-for="UserEmail" class="form-control" readonly />
             </div>
 
             <div class="mb-3">
-                <label asp-for="Password" class="form-label">Парола</label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <label asp-for="SelectedRole" class="form-label">Роля при одобряване</label>
+                <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-select"></select>
+                <span asp-validation-for="SelectedRole" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label">Потвърди парола</label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="AdminNote" class="form-label">Бележка (по желание)</label>
+                <label asp-for="AdminNote" class="form-label">Бележка към потребителя</label>
                 <textarea asp-for="AdminNote" class="form-control" rows="3"></textarea>
+                <div class="form-text">Бележката ще се показва в профила на курсиста след одобрение.</div>
             </div>
 
-            <button type="submit" class="btn btn-success">Одобри и създай профил</button>
+            <button type="submit" class="btn btn-success">Одобри и задай роля</button>
             <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.RequestId">Назад</a>
         </form>
     </div>

@@ -22,5 +22,6 @@ namespace AutoSchoolProject.ViewModels.Admin
 
         public string? CreatedStudentEmail { get; set; }
         public string? CreatedStudentUserId { get; set; }
+        public string? AssignedRole { get; set; }
     }
 }

@@ -13,6 +13,12 @@ namespace AutoSchoolProject.ViewModels.Public
         [Phone(ErrorMessage = "Невалиден телефон.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Липсва имейлът на влезлия потребител.")]
+        [EmailAddress(ErrorMessage = "Невалиден имейл.")]
+        public string Email { get; set; } = string.Empty;
+
+        public bool IsEmailReadOnly { get; set; }
+
         [Required(ErrorMessage = "Избери категория/курс.")]
         public int CourseId { get; set; }
 
@@ -20,7 +26,7 @@ namespace AutoSchoolProject.ViewModels.Public
         [DataType(DataType.Date)]
         public DateTime PreferredStartDate { get; set; } = DateTime.Today.AddDays(7);
 
-        //dropdown menu
         public List<SelectListItem> Courses { get; set; } = new();
     }
+
 }

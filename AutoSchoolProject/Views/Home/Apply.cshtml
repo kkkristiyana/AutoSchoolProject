@@ -5,6 +5,7 @@
 }
 
 <h2 class="mb-3">📝 Заявка за записване</h2>
+<p class="text-muted">Имейлът се взема автоматично от профила, с който си влязъл.</p>
 
 <div asp-validation-summary="All" class="text-danger"></div>
 
@@ -23,6 +24,12 @@
                 <label asp-for="PhoneNumber" class="form-label">Телефон</label>
                 <input asp-for="PhoneNumber" class="form-control" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Имейл</label>
+                <input asp-for="Email" class="form-control" readonly />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
