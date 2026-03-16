@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Admin\Views\InstructorPanel\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 

@@ -1,0 +1,92 @@
+﻿@model AutoSchoolProject.ViewModels.Admin.InstructorPanelLessonsViewModel
+
+@{
+    ViewData["Title"] = "Часове (Admin Instructor Panel)";
+    int instructorId = ViewBag.InstructorId is int v ? v : 0;
+}
+
+<partial name="_InstructorPanelNav" />
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="instructorId" value="@instructorId" />
+    <div class="col-md-4">
+        <select class="form-select" name="status">
+            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.Status))">Всички</option>
+            <option value="Available" selected="@(Model.Status == "Available")">Available</option>
+            <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
+            <option value="Approved" selected="@(Model.Status == "Approved")">Approved</option>
+            <option value="Rejected" selected="@(Model.Status == "Rejected")">Rejected</option>
+            <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Филтър</button>
+    </div>
+</form>
+
+@if (!Model.Lessons.Any())
+{
+    <div class="alert alert-info">Няма намерени часове.</div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Курсист</th>
+                <th>Категория</th>
+                <th>Статус</th>
+                <th>Бележка</th>
+                <th class="text-end">Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var lesson in Model.Lessons)
+            {
+                <tr>
+                    <td>@lesson.DateTime.ToString("dd.MM.yyyy HH:mm")<br /><span class="small text-muted">@lesson.DurationMinutes мин</span></td>
+                    <td>@(string.IsNullOrWhiteSpace(lesson.StudentName) ? "—" : lesson.StudentName)</td>
+                    <td>@lesson.CourseName</td>
+                    <td>@lesson.Status @(lesson.Completed ? "• Завършен" : string.Empty)</td>
+                    <td>@lesson.Note</td>
+                    <td class="text-end">
+                        @if (lesson.Status == "Pending")
+                        {
+                            <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="ApproveLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                            <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="RejectLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-warning">Reject</button>
+                            </form>
+                        }
+
+                        <a class="btn btn-sm btn-outline-primary"
+                           asp-area="Admin" asp-controller="InstructorPanel" asp-action="RescheduleLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id">Пренасрочи</a>
+
+                        @if (!lesson.Completed && lesson.Status != "Cancelled" && lesson.Status != "Rejected" && lesson.Status != "Available")
+                        {
+                            <a class="btn btn-sm btn-outline-success"
+                               asp-area="Admin" asp-controller="InstructorPanel" asp-action="CompleteLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id">Проведен</a>
+                        }
+
+                        @if (lesson.Status != "Cancelled" && lesson.Status != "Rejected")
+                        {
+                            <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="CancelLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

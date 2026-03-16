@@ -1,0 +1,38 @@
+﻿@model AutoSchoolProject.ViewModels.Admin.InstructorPanelStudentsViewModel
+
+@{
+    ViewData["Title"] = "Курсисти (Admin Instructor Panel)";
+}
+
+<partial name="_InstructorPanelNav" />
+
+@if (!Model.Students.Any())
+{
+    <div class="alert alert-info">Този инструктор все още няма курсисти.</div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Курсист</th>
+                <th>Категория</th>
+                <th>Проведени</th>
+                <th>Оставащи</th>
+                <th>Последен час</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in Model.Students)
+            {
+                <tr>
+                    <td>@student.FullName</td>
+                    <td>@student.CourseName</td>
+                    <td>@student.CompletedLessons</td>
+                    <td>@student.RemainingLessons</td>
+                    <td>@(student.LastLessonDate.HasValue? student.LastLessonDate.Value.ToString("dd.MM.yyyy HH:mm") : "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

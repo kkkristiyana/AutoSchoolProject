@@ -1,0 +1,41 @@
+﻿@model AutoSchoolProject.ViewModels.Admin.InstructorPanelRescheduleLessonViewModel
+
+@{
+    ViewData["Title"] = "Пренасрочване (Admin Instructor Panel)";
+    int instructorId = ViewBag.InstructorId is int v ? v : 0;
+}
+
+<partial name="_InstructorPanelNav" />
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <p class="mb-1"><strong>Курсист:</strong> @Model.StudentName</p>
+        <p class="mb-3"><strong>Текущ час:</strong> @Model.CurrentDateTime.ToString("dd.MM.yyyy HH:mm")</p>
+
+        <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="RescheduleLesson" asp-route-instructorId="@instructorId" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="LessonId" />
+            <input type="hidden" asp-for="StudentName" />
+            <input type="hidden" asp-for="CurrentDateTime" />
+
+            <div class="mb-3">
+                <label asp-for="NewDateTime" class="form-label"></label>
+                <input asp-for="NewDateTime" type="datetime-local" class="form-control" value="@Model.NewDateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="NewDateTime" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DurationMinutes" class="form-label"></label>
+                <input asp-for="DurationMinutes" class="form-control" />
+                <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Запази</button>
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Lessons" asp-route-instructorId="@instructorId">Назад</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

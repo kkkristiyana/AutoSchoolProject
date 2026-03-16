@@ -41,6 +41,8 @@
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-primary"
                        asp-area="Admin" asp-controller="Instructors" asp-action="Edit" asp-route-id="@i.Id">Редакция</a>
+                    <a class="btn btn-sm btn-primary"
+                       asp-area="Admin" asp-controller="InstructorPanel" asp-action="Profile" asp-route-instructorId="@i.Id">Instructor Panel</a>
                 </td>
             </tr>
         }

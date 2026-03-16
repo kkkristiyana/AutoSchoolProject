@@ -1,0 +1,25 @@
+﻿@{
+    int instructorId = ViewBag.InstructorId is int v ? v : 0;
+    string instructorName = ViewBag.InstructorName as string ?? "—";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+        <div class="small text-muted">Admin Instructor Panel</div>
+        <div class="h5 mb-0">🧑‍🏫 @instructorName</div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-primary"
+           asp-area="Admin" asp-controller="InstructorPanel" asp-action="Profile" asp-route-instructorId="@instructorId">Профил</a>
+        <a class="btn btn-outline-primary"
+           asp-area="Admin" asp-controller="InstructorPanel" asp-action="Lessons" asp-route-instructorId="@instructorId">Часове</a>
+        <a class="btn btn-outline-primary"
+           asp-area="Admin" asp-controller="InstructorPanel" asp-action="Students" asp-route-instructorId="@instructorId">Курсисти</a>
+        <a class="btn btn-outline-success"
+           asp-area="Admin" asp-controller="InstructorPanel" asp-action="CreateSlot" asp-route-instructorId="@instructorId">Нов слот</a>
+    </div>
+
+    <a class="btn btn-outline-secondary"
+       asp-area="Admin" asp-controller="InstructorPanel" asp-action="Index">← Списък инструктори</a>
+</div>

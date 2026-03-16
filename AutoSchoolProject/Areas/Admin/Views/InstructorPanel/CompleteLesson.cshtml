@@ -1,0 +1,30 @@
+﻿@model AutoSchoolProject.ViewModels.Admin.InstructorPanelCompleteLessonViewModel
+
+@{
+    ViewData["Title"] = "Отбележи проведен час";
+    int instructorId = ViewBag.InstructorId is int v ? v : 0;
+}
+
+<partial name="_InstructorPanelNav" />
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <p class="mb-1"><strong>Курсист:</strong> @Model.StudentName</p>
+        <p class="mb-3"><strong>Дата:</strong> @Model.LessonDateTime.ToString("dd.MM.yyyy HH:mm")</p>
+
+        <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="CompleteLesson" asp-route-instructorId="@instructorId" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="LessonId" />
+            <input type="hidden" asp-for="StudentName" />
+            <input type="hidden" asp-for="LessonDateTime" />
+
+            <div class="mb-3">
+                <label asp-for="Note" class="form-label"></label>
+                <textarea asp-for="Note" class="form-control" rows="4"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">Маркирай като проведен</button>
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Lessons" asp-route-instructorId="@instructorId">Назад</a>
+        </form>
+    </div>
+</div>
