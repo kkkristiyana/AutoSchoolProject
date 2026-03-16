@@ -33,34 +33,15 @@
                                 <a class="nav-link text-dark" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Conditions">Условия</a>
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="ConditionsViewerOnly">Условия</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Contacts">Контакти</a>
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="ContactsViewerOnly">Контакти</a>
                             </li>
 
                         }
-                        @if (User.Identity.IsAuthenticated == true && User.IsInRole(""))
-                        {
-                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Начало</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Courses">Курсове</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Conditions">Условия</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Contacts">Контакти</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
-                            </li>
-
-                        }
-                        @if (User.Identity != null && User.IsInRole("Student"))
+                        
+                        else if (User.Identity != null && User.IsInRole("Student"))
                         {
                             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
@@ -80,7 +61,7 @@
                             </li>
                         }
 
-                        @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Instructor"))
+                        else if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Instructor"))
                         {
                             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
@@ -89,12 +70,32 @@
 
                         }
 
-                        @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        else if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                         {
                             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin</a>
                             </li>
+                        }
+                        else
+                        {
+                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Начало</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Courses">Курсове</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Conditions">Условия</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Contacts">Контакти</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
+                            </li>
+
                         }
                     </ul>
 

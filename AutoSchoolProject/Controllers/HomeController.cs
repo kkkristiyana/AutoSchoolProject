@@ -51,8 +51,9 @@ namespace AutoSchoolProject.Controllers
         }
 
         public IActionResult Conditions() => View();
-
+        public IActionResult ConditionsViewerOnly() => View();
         public IActionResult Contacts() => View();
+        public IActionResult ContactsViewerOnly() => View();
 
         [HttpGet]
         public async Task<IActionResult> Apply()
