@@ -2,8 +2,10 @@
 using AutoSchoolProject.Models;
 using AutoSchoolProject.Services;
 using AutoSchoolProject.ViewModels.Instructor;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AutoSchoolProject.Controllers
 {
@@ -11,6 +13,7 @@ namespace AutoSchoolProject.Controllers
     {
         private readonly InstructorService _instructorService;
         private readonly ApplicationDbContext _context;
+        
 
         public InstructorController(InstructorService instructorService, ApplicationDbContext context)
         {
@@ -31,6 +34,7 @@ namespace AutoSchoolProject.Controllers
         {
             var lessons = await _context.PracticeLessons
                 .Include(l => l.Student)
+                .Where(l => l.Instructor.UserId== User.FindFirstValue(ClaimTypes.NameIdentifier))
                 .ToListAsync();
 
             var model = new InstructorDashboardViewModel
