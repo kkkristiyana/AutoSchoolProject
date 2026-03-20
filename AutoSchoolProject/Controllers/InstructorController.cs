@@ -13,7 +13,7 @@ namespace AutoSchoolProject.Controllers
     {
         private readonly InstructorService _instructorService;
         private readonly ApplicationDbContext _context;
-        
+
 
         public InstructorController(InstructorService instructorService, ApplicationDbContext context)
         {
@@ -32,17 +32,21 @@ namespace AutoSchoolProject.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var lessons = await _context.PracticeLessons
-                .Include(l => l.Student)
-                .Where(l => l.Instructor.UserId== User.FindFirstValue(ClaimTypes.NameIdentifier))
-                .ToListAsync();
+    .Include(l => l.Student)
+        .ThenInclude(s => s.User)
+    .Include(l => l.Instructor)
+    .Where(l => l.Instructor != null && l.Instructor.UserId == userId)
+    .ToListAsync();
 
             var model = new InstructorDashboardViewModel
             {
-                InstructorName = User.Identity.Name,
+                InstructorName = User.Identity?.Name ?? "Instructor",
                 UpcomingLessons = lessons.Where(l => l.DateTime > DateTime.Now).ToList(),
                 PendingLessons = lessons.Where(l => l.Status == 0).ToList(),
-                CompletedLessonsCount = lessons.Count(l => l.Completed == true)
+                CompletedLessonsCount = lessons.Count(l => l.Completed)
             };
 
             return View(model);
@@ -71,13 +75,22 @@ namespace AutoSchoolProject.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var lesson = new PracticeLesson
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var instructor = await _context.Instructors
+                .FirstOrDefaultAsync(i => i.UserId == userId);
+
+            if (instructor == null)
             {
-                StudentId = model.StudentId,
-                DateTime = model.DateTime,
-                DurationMinutes = model.DurationMinutes,
-                Status = 0
-            };
+                return Content("Нямаш Instructor профил");
+            }
+
+            var lesson = await _context.PracticeLessons
+            .Include(l => l.Student)
+            .ThenInclude(s => s.User) 
+            .Include(l => l.Instructor)
+            .Where(l => l.Instructor != null && l.Instructor.UserId == userId)
+            .ToListAsync();
 
             _context.Add(lesson);
             await _context.SaveChangesAsync();
