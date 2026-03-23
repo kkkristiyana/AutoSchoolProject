@@ -1,25 +1,28 @@
 ﻿@model AutoSchoolProject.ViewModels.Admin.InstructorPanelIndexViewModel
-
 @{
-    ViewData["Title"] = "Admin Instructor Panel";
+    ViewData["Title"] = "Панел на инструктори";
 }
 
-<h2 class="mb-3">🧩 Admin Instructor Panel</h2>
+<h2 class="mb-3">Панел на инструктори</h2>
 
-<form method="get" class="row g-2 mb-3">
-    <div class="col-md-6">
-        <input class="form-control" name="q" value="@Model.Query" placeholder="Търси по име / имейл / телефон" />
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100" type="submit">Търси</button>
-    </div>
-    <div class="col-md-2">
-        <a class="btn btn-outline-secondary w-100" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Index">Изчисти</a>
-    </div>
-    <div class="col-md-2">
-        <a class="btn btn-outline-secondary w-100" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+<form method="get" class="card shadow-sm p-3 mb-3">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label">Търсене</label>
+            <input type="text" name="q" value="@Model.Query" class="form-control" placeholder="Име, имейл или телефон" />
+        </div>
+        <div class="col-md-3 d-grid">
+            <button class="btn btn-primary" type="submit">Търси</button>
+        </div>
+        <div class="col-md-3 d-grid">
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Index">Изчисти</a>
+        </div>
     </div>
 </form>
+
+<div class="mb-3">
+    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">← Към админ таблото</a>
+</div>
 
 @if (!Model.Instructors.Any())
 {
@@ -27,43 +30,44 @@
 }
 else
 {
-    <table class="table table-hover align-middle">
-        <thead>
-            <tr>
-                <th>Инструктор</th>
-                <th>Имейл</th>
-                <th>Телефон</th>
-                <th>Категория</th>
-                <th class="text-end">Панел</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var i in Model.Instructors)
-            {
-                <tr>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            @if (!string.IsNullOrWhiteSpace(i.ProfileImagePath))
-                            {
-                                <img src="@i.ProfileImagePath" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
-                            }
-                            <div>
-                                <div class="fw-semibold">@i.FullName</div>
-                                <div class="small text-muted">ID: @i.InstructorId</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>@i.Email</td>
-                    <td>@i.PhoneNumber</td>
-                    <td>@i.CourseName</td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-primary"
-                           asp-area="Admin" asp-controller="InstructorPanel" asp-action="Profile" asp-route-instructorId="@i.InstructorId">
-                            Влез в панела
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Инструктор</th>
+                        <th>Имейл</th>
+                        <th>Телефон</th>
+                        <th>Категория</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in Model.Instructors)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrWhiteSpace(i.ProfileImagePath))
+                                    {
+                                        <img src="@i.ProfileImagePath" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
+                                    }
+                                    <span>@i.FullName</span>
+                                </div>
+                            </td>
+                            <td>@i.Email</td>
+                            <td>@i.PhoneNumber</td>
+                            <td>@i.CourseName</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary"
+                                   asp-area="Admin" asp-controller="InstructorPanel" asp-action="Profile" asp-route-instructorId="@i.InstructorId">
+                                    Отвори панела
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }

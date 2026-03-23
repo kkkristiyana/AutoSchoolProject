@@ -3,7 +3,7 @@
     ViewData["Title"] = "Курсове";
 }
 
-<h2 class="mb-3">📚 Курсове / Категории</h2>
+<h2 class="mb-3">Курсове и категории</h2>
 
 @if (TempData["Success"] != null)
 {
@@ -16,15 +16,15 @@
 
 <div class="d-flex gap-2 mb-3">
     <a class="btn btn-primary" asp-area="Admin" asp-controller="Courses" asp-action="Create">+ Нов курс</a>
-    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">← Dashboard</a>
+    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">← Към таблото</a>
 </div>
 
-<table class="table table-striped">
+<table class="table table-striped align-middle">
     <thead>
         <tr>
             <th>Име</th>
             <th>Цена</th>
-            <th>Задълж. часове</th>
+            <th>Задължителни часове</th>
             <th>Ученици</th>
             <th>Инструктори</th>
             <th class="text-end">Действия</th>

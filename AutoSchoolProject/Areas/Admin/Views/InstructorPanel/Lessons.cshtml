@@ -1,8 +1,16 @@
 ﻿@model AutoSchoolProject.ViewModels.Admin.InstructorPanelLessonsViewModel
-
 @{
-    ViewData["Title"] = "Часове (Admin Instructor Panel)";
+    ViewData["Title"] = "Часове";
     int instructorId = ViewBag.InstructorId is int v ? v : 0;
+    string StatusBg(string? status) => status switch
+    {
+        "Available" => "Свободен слот",
+        "Pending" => "Изчаква одобрение",
+        "Approved" => "Одобрен",
+        "Rejected" => "Отказан",
+        "Cancelled" => "Отменен",
+        _ => status ?? "—"
+    };
 }
 
 <partial name="_InstructorPanelNav" />
@@ -12,33 +20,35 @@
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 
-<form method="get" class="row g-2 mb-3">
-    <input type="hidden" name="instructorId" value="@instructorId" />
-    <div class="col-md-4">
-        <select class="form-select" name="status">
-            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.Status))">Всички</option>
-            <option value="Available" selected="@(Model.Status == "Available")">Available</option>
-            <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
-            <option value="Approved" selected="@(Model.Status == "Approved")">Approved</option>
-            <option value="Rejected" selected="@(Model.Status == "Rejected")">Rejected</option>
-            <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
-        </select>
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100" type="submit">Филтър</button>
-    </div>
-</form>
+<div class="card shadow-sm p-3 mb-3">
+    <form method="get" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Lessons" asp-route-instructorId="@instructorId" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Филтър по статус</label>
+            <select name="status" class="form-select">
+                <option value="" selected="@(string.IsNullOrWhiteSpace(Model.Status))">Всички</option>
+                <option value="Available" selected="@(Model.Status == "Available")">Свободни слотове</option>
+                <option value="Pending" selected="@(Model.Status == "Pending")">Изчакват одобрение</option>
+                <option value="Approved" selected="@(Model.Status == "Approved")">Одобрени</option>
+                <option value="Rejected" selected="@(Model.Status == "Rejected")">Отказани</option>
+                <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Отменени</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-grid">
+            <button class="btn btn-primary" type="submit">Приложи</button>
+        </div>
+    </form>
+</div>
 
 @if (!Model.Lessons.Any())
 {
-    <div class="alert alert-info">Няма намерени часове.</div>
+    <div class="alert alert-info">Няма намерени часове за този инструктор.</div>
 }
 else
 {
     <table class="table table-hover align-middle">
         <thead>
             <tr>
-                <th>Дата</th>
+                <th>Дата и час</th>
                 <th>Курсист</th>
                 <th>Категория</th>
                 <th>Статус</th>
@@ -50,21 +60,21 @@ else
             @foreach (var lesson in Model.Lessons)
             {
                 <tr>
-                    <td>@lesson.DateTime.ToString("dd.MM.yyyy HH:mm")<br /><span class="small text-muted">@lesson.DurationMinutes мин</span></td>
+                    <td>@lesson.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
                     <td>@(string.IsNullOrWhiteSpace(lesson.StudentName) ? "—" : lesson.StudentName)</td>
                     <td>@lesson.CourseName</td>
-                    <td>@lesson.Status @(lesson.Completed ? "• Завършен" : string.Empty)</td>
+                    <td>@StatusBg(lesson.Status) @(lesson.Completed ? "• Проведен" : string.Empty)</td>
                     <td>@lesson.Note</td>
                     <td class="text-end">
                         @if (lesson.Status == "Pending")
                         {
                             <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="ApproveLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <button class="btn btn-sm btn-success">Approve</button>
+                                <button class="btn btn-sm btn-success">Приеми</button>
                             </form>
                             <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="RejectLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <button class="btn btn-sm btn-warning">Reject</button>
+                                <button class="btn btn-sm btn-warning">Откажи</button>
                             </form>
                         }
 
@@ -81,7 +91,7 @@ else
                         {
                             <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="CancelLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                <button class="btn btn-sm btn-outline-danger">Отмени</button>
                             </form>
                         }
                     </td>

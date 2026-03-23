@@ -1,14 +1,13 @@
 ﻿@model AutoSchoolProject.ViewModels.Admin.StudentPanelIndexViewModel
-
 @{
-    ViewData["Title"] = "Admin Student Panel";
+    ViewData["Title"] = "Панел на курсисти";
 }
 
-<h2 class="mb-3">🧩 Admin Student Panel</h2>
+<h2 class="mb-3">Панел на курсисти</h2>
 
 <form method="get" class="row g-2 mb-3">
     <div class="col-md-6">
-        <input class="form-control" name="q" value="@Model.Query" placeholder="Търси по име / имейл / телефон" />
+        <input class="form-control" name="q" value="@Model.Query" placeholder="Търси по име, имейл или телефон" />
     </div>
     <div class="col-md-2">
         <button class="btn btn-primary w-100" type="submit">Търси</button>
@@ -17,7 +16,7 @@
         <a class="btn btn-outline-secondary w-100" asp-area="Admin" asp-controller="StudentPanel" asp-action="Index">Изчисти</a>
     </div>
     <div class="col-md-2">
-        <a class="btn btn-outline-secondary w-100" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+        <a class="btn btn-outline-secondary w-100" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Към таблото</a>
     </div>
 </form>
 
@@ -59,7 +58,7 @@ else
                     <td class="text-end">
                         <a class="btn btn-sm btn-primary"
                            asp-area="Admin" asp-controller="StudentPanel" asp-action="Profile" asp-route-studentId="@s.StudentId">
-                            Влез в панела
+                            Отвори панела
                         </a>
                     </td>
                 </tr>

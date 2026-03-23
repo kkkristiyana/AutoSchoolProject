@@ -2,9 +2,18 @@
 @{
     ViewData["Title"] = "Часове";
     var status = (ViewBag.Status as string) ?? "";
+    string StatusBg(string? value) => value switch
+    {
+        "Available" => "Свободен слот",
+        "Pending" => "Изчаква одобрение",
+        "Approved" => "Одобрен",
+        "Rejected" => "Отказан",
+        "Cancelled" => "Отменен",
+        _ => value ?? "—"
+    };
 }
 
-<h2 class="mb-3">📅 Часове</h2>
+<h2 class="mb-3">Часове</h2>
 
 @if (TempData["Success"] != null)
 {
@@ -13,18 +22,18 @@
 
 <div class="d-flex gap-2 mb-3">
     <a class="btn btn-success" asp-area="Admin" asp-controller="Lessons" asp-action="CreateSlot">+ Свободен слот</a>
-    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">← Dashboard</a>
+    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">← Към таблото</a>
 </div>
 
 <form method="get" class="row g-2 mb-3">
     <div class="col-md-4">
         <select class="form-select" name="status">
             <option value="" selected="@(status == "")">Всички</option>
-            <option value="Available" selected="@(status == "Available")">Available (свободни)</option>
-            <option value="Pending" selected="@(status == "Pending")">Pending (заявки)</option>
-            <option value="Approved" selected="@(status == "Approved")">Approved</option>
-            <option value="Rejected" selected="@(status == "Rejected")">Rejected</option>
-            <option value="Cancelled" selected="@(status == "Cancelled")">Cancelled</option>
+            <option value="Available" selected="@(status == "Available")">Свободни слотове</option>
+            <option value="Pending" selected="@(status == "Pending")">Изчакват одобрение</option>
+            <option value="Approved" selected="@(status == "Approved")">Одобрени</option>
+            <option value="Rejected" selected="@(status == "Rejected")">Отказани</option>
+            <option value="Cancelled" selected="@(status == "Cancelled")">Отменени</option>
         </select>
     </div>
     <div class="col-md-2">
@@ -32,7 +41,7 @@
     </div>
 </form>
 
-<table class="table table-hover">
+<table class="table table-hover align-middle">
     <thead>
         <tr>
             <th>Дата</th>
@@ -49,17 +58,17 @@
                 <td>@l.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
                 <td>@(string.IsNullOrWhiteSpace(l.StudentName) ? "—" : l.StudentName)</td>
                 <td>@(string.IsNullOrWhiteSpace(l.InstructorName) ? "—" : l.InstructorName)</td>
-                <td>@l.Status</td>
+                <td>@StatusBg(l.Status)</td>
                 <td class="text-end">
                     @if (l.Status == "Pending")
                     {
                         <form asp-area="Admin" asp-controller="Lessons" asp-action="Approve" asp-route-id="@l.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
-                            <button class="btn btn-sm btn-success">Approve</button>
+                            <button class="btn btn-sm btn-success">Приеми</button>
                         </form>
                         <form asp-area="Admin" asp-controller="Lessons" asp-action="Reject" asp-route-id="@l.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
-                            <button class="btn btn-sm btn-warning">Reject</button>
+                            <button class="btn btn-sm btn-warning">Откажи</button>
                         </form>
                     }
 
@@ -67,7 +76,7 @@
                     {
                         <form asp-area="Admin" asp-controller="Lessons" asp-action="Cancel" asp-route-id="@l.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
-                            <button class="btn btn-sm btn-danger">Cancel</button>
+                            <button class="btn btn-sm btn-danger">Отмени</button>
                         </form>
                     }
                 </td>
@@ -75,3 +84,4 @@
         }
     </tbody>
 </table>
+

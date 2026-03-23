@@ -3,10 +3,10 @@
     string studentName = ViewBag.StudentName as string ?? "—";
 }
 
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 instructor-nav-shell">
     <div>
-        <div class="small text-muted">Admin Student Panel</div>
-        <div class="h5 mb-0">👨‍🎓 @studentName</div>
+        <div class="small text-muted">Админ панел за курсист</div>
+        <div class="h5 mb-0 instructor-nav-title">@studentName</div>
     </div>
 
     <div class="btn-group" role="group">
@@ -23,5 +23,5 @@
     </div>
 
     <a class="btn btn-outline-secondary"
-       asp-area="Admin" asp-controller="StudentPanel" asp-action="Index">← Списък ученици</a>
+       asp-area="Admin" asp-controller="StudentPanel" asp-action="Index">← Списък с ученици</a>
 </div>

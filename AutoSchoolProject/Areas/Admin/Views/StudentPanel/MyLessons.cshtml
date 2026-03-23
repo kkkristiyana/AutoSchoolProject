@@ -1,13 +1,11 @@
 ﻿@model List<AutoSchoolProject.ViewModels.Student.MyLessonListItemViewModel>
 
 @{
-    ViewData["Title"] = "Моите часове (Admin Student Panel)";
+    ViewData["Title"] = "Моите часове";
     int studentId = ViewBag.StudentId is int v ? v : 0;
 }
 
 <partial name="_StudentPanelNav" />
-
-<h3 class="mb-3">📅 Моите часове</h3>
 
 @if (TempData["Error"] != null)
 {
@@ -20,18 +18,17 @@
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">Няма записани часове.</div>
+    <div class="alert alert-info">Курсистът няма записани часове.</div>
 }
 else
 {
-    <table class="table table-hover">
+    <table class="table table-hover align-middle">
         <thead>
             <tr>
                 <th>Дата</th>
                 <th>Инструктор</th>
                 <th>Категория</th>
                 <th>Статус</th>
-                <th>Завършен</th>
                 <th>Бележка</th>
                 <th></th>
             </tr>
@@ -44,18 +41,14 @@ else
                     <td>@l.InstructorName</td>
                     <td>@l.CourseName</td>
                     <td>@l.Status</td>
-                    <td>@(l.Completed ? "✅" : "—")</td>
                     <td>@l.Note</td>
-                    <td class="text-end">
-                        @if (!l.Completed && l.DateTime > DateTime.Now && (l.Status == "Pending" || l.Status == "Approved"))
+                    <td>
+                        @if (!l.Completed && l.DateTime > DateTime.Now && (l.Status == "Изчаква одобрение" || l.Status == "Одобрен"))
                         {
                             <form asp-area="Admin" asp-controller="StudentPanel" asp-action="CancelLesson" asp-route-studentId="@studentId" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@l.Id" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Сигурен ли си, че искаш да отмениш този час?');">
-                                    Отмени
-                                </button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Отмени</button>
                             </form>
                         }
                     </td>

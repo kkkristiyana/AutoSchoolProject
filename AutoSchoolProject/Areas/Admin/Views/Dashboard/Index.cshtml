@@ -1,53 +1,55 @@
 ﻿@model DashboardViewModel
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Админ табло";
 }
 
-<h2 class="mb-3">📊 Admin Dashboard</h2>
+<h2 class="mb-3">Админ табло</h2>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card"><div class="card-body">👨‍🎓 Ученици: <strong>@Model.TotalStudents</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">🧑‍🏫 Инструктори: <strong>@Model.TotalInstructors</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">📅 Часове общо: <strong>@Model.TotalLessons</strong></div></div></div>
-
-    <div class="col-md-4"><div class="card"><div class="card-body">⏳ Pending: <strong>@Model.PendingLessons</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">✅ Approved (предстоящи): <strong>@Model.ApprovedUpcomingLessons</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">🏁 Завършени: <strong>@Model.CompletedLessons</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">Ученици: <strong>@Model.TotalStudents</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">Инструктори: <strong>@Model.TotalInstructors</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">Часове общо: <strong>@Model.TotalLessons</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">Чакащи заявки за час: <strong>@Model.PendingLessons</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">Одобрени предстоящи часове: <strong>@Model.ApprovedUpcomingLessons</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body">Проведени часове: <strong>@Model.CompletedLessons</strong></div></div></div>
 </div>
 
-<div class="d-flex gap-2 mb-3">
+<div class="d-flex gap-2 flex-wrap mb-4">
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Lessons" asp-action="Index">Часове</a>
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Students" asp-action="Index">Ученици</a>
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Instructors" asp-action="Index">Инструктори</a>
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Requests" asp-action="Index">Заявки</a>
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Courses" asp-action="Index">Курсове</a>
+</div>
 
+<div class="d-flex gap-2 flex-wrap mb-4">
+    <a class="btn btn-outline-success" asp-area="Admin" asp-controller="StudentPanel" asp-action="Index">Панел на курсист</a>
+    <a class="btn btn-outline-success" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Index">Панел на инструктор</a>
 </div>
-<div class="d-flex gap-2 mb-3">
-    <a class="btn btn-outline-success" asp-area="Admin" asp-controller="StudentPanel" asp-action="Index">Student Panel</a>
-    <a class="btn btn-outline-success" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Index">Instructor Panel</a>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">Последни часове</h5>
+        <table class="table table-striped align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Инструктор</th>
+                    <th>Курсист</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var l in Model.LatestLessons)
+                {
+                    <tr>
+                        <td>@l.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@l.InstructorName</td>
+                        <td>@l.StudentName</td>
+                        <td>@l.Status</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
-<h4 class="mt-4">Последни 10 часа</h4>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Дата</th>
-            <th>Ученик</th>
-            <th>Инструктор</th>
-            <th>Статус</th>
-            <th>Завършен</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var l in Model.LatestLessons)
-        {
-            <tr>
-                <td>@l.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>@l.StudentName</td>
-                <td>@l.InstructorName</td>
-                <td>@l.Status</td>
-                <td>@(l.Completed ? "✅" : "—")</td>
-            </tr>
-        }
-    </tbody>
-</table>
