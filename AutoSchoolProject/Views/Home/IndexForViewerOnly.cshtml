@@ -2,43 +2,57 @@
     ViewData["Title"] = "Начало";
 }
 
-<div class="p-4 p-md-5 mb-4 bg-light rounded-3 border">
-    <div class="container-fluid py-2">
-        <h1 class="display-6 mb-2">Автошкола – система за управление</h1>
-        <p class="text-muted mb-3">
-            Курсове, записване за практика, графици, тестове и админ/инструктор панел.
-        </p>
+<section class="home-hero">
+    <div class="home-hero-grid">
+        <div class="home-hero-copy">
+            <span class="hero-kicker">Онлайн управление на автошкола</span>
+            <h1>Започни курса си <span>по правилния път.</span></h1>
+            <p>
+                Виж категориите, условията и контактите на автошколата.
+                За да изпратиш заявка за записване, първо си направи регистрация.
+            </p>
 
-        <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-primary" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове и цени</a>
-            <a class="btn btn-outline-dark" asp-controller="Home" asp-action="ContactsViewerOnly">Контакти</a>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове и цени</a>
+                <a class="btn btn-warning" asp-area="Identity" asp-page="/Account/Register">Регистрация</a>
+                <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="ContactsViewerOnly">Контакти</a>
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="row g-3">
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Посетител</h5>
-                <p class="card-text">Разглежда информация и изпраща заявка за записване.</p>
+        <div class="home-hero-visual">
+            <div class="placeholder-media">Място за основна снимка</div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <h2 class="home-section-title">Какво ще намериш тук</h2>
+    <p class="home-section-subtitle">Подготвен старт за курсисти, инструктори и администрация.</p>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="home-service-card">
+                <div class="placeholder-media">Снимка 1</div>
+                <h5>Курсове</h5>
+                <p>Подробна информация за категориите, цените и условията за обучение.</p>
+                <a class="btn btn-outline-primary" asp-controller="Home" asp-action="CoursesInfoOnly">Преглед</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="home-service-card">
+                <div class="placeholder-media">Снимка 2</div>
+                <h5>Лесна регистрация</h5>
+                <p>Създай профил и използвай същия имейл и парола през целия процес на обучение.</p>
+                <a class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/Register">Създай профил</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="home-service-card">
+                <div class="placeholder-media">Снимка 3</div>
+                <h5>Практически часове</h5>
+                <p>След одобрение ще можеш да избираш инструктор и свободни часове за практика.</p>
+                <a class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/Login">Вход</a>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Курсист</h5>
-                <p class="card-text">Записва часове от свободни слотове, вижда график и тестове.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Инструктор / Админ</h5>
-                <p class="card-text">Одобряване/отказ на часове, отбелязване проведен час, справки.</p>
-            </div>
-        </div>
-    </div>
-</div>
+</section>

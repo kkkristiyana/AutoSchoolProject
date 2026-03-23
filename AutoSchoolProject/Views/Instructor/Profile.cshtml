@@ -1,0 +1,65 @@
+﻿@model AutoSchoolProject.ViewModels.Instructor.InstructorDashboardViewModel
+@{
+    ViewData["Title"] = "Профил на инструктор";
+}
+
+<partial name="_InstructorPanelNav" />
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-body d-flex gap-3 align-items-start">
+                @if (!string.IsNullOrWhiteSpace(Model.ProfileImagePath))
+                {
+                    <img src="@Model.ProfileImagePath" alt="Профилна снимка" style="width:96px;height:96px;object-fit:cover;border-radius:50%;" />
+                }
+                else
+                {
+                    <div style="width:96px;height:96px;border-radius:50%;background:#e9ecef;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;">
+                        @(string.IsNullOrWhiteSpace(Model.InstructorName) ? "?" : Model.InstructorName.Substring(0, 1).ToUpper())
+                    </div>
+                }
+
+                <div>
+                    <h3 class="mb-2">@Model.InstructorName</h3>
+                    <p class="mb-1"><strong>Имейл:</strong> @Model.Email</p>
+                    <p class="mb-1"><strong>Телефон:</strong> @Model.PhoneNumber</p>
+                    <p class="mb-1"><strong>Категория:</strong> @Model.CourseName</p>
+                    <p class="mb-0"><strong>Автомобил:</strong> @(string.IsNullOrWhiteSpace(Model.CarModel) ? "Няма въведен автомобил" : Model.CarModel)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Статистика</h5>
+                <p class="mb-2">Заявки за одобрение: <strong>@Model.PendingLessonsCount</strong></p>
+                <p class="mb-2">Одобрени предстоящи часове: <strong>@Model.UpcomingApprovedLessonsCount</strong></p>
+                <p class="mb-0">Проведени часове: <strong>@Model.CompletedLessonsCount</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.CarImagePath))
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Снимка на автомобила</h5>
+            <img src="@Model.CarImagePath" alt="Снимка на автомобила" style="max-width:100%;max-height:280px;object-fit:cover;border-radius:16px;" />
+        </div>
+    </div>
+}
+
+<div class="d-flex flex-wrap gap-2">
+    <a asp-action="EditProfile" class="btn btn-primary">Редактирай профила</a>
+    <a asp-action="PendingLessons" class="btn btn-warning">Виж чакащите заявки</a>
+    <a asp-action="Schedule" class="btn btn-outline-secondary">Към графика</a>
+</div>

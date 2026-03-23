@@ -59,10 +59,9 @@ namespace AutoSchoolProject.Services
             return new InstructorDashboardViewModel
             {
                 CompletedLessonsCount = lessons.Count(l => l.Completed),
-                UpcomingLessons = lessons
-                    .Where(l => l.DateTime >= DateTime.Now)
-                    .OrderBy(l => l.DateTime)
-                    .ToList()
+                UpcomingApprovedLessonsCount = lessons
+                    .Count(l => l.DateTime >= DateTime.Now)
+
             };
         }
 

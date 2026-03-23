@@ -34,19 +34,18 @@
 
         <div>
             <h5 class="card-title mb-2">@Model.FullName</h5>
-            <p class="mb-1"><strong>Email:</strong> @Model.Email</p>
+            <p class="mb-1"><strong>Имейл:</strong> @Model.Email</p>
             <p class="mb-1"><strong>Телефон:</strong> @Model.PhoneNumber</p>
             <p class="mb-0"><strong>Курс:</strong> @Model.CourseName</p>
         </div>
     </div>
 </div>
 
-
 @if (!string.IsNullOrWhiteSpace(Model.AdminMessage))
 {
     <div class="card border-info shadow-sm mb-4">
         <div class="card-body">
-            <h5 class="card-title mb-2">📩 Съобщение от администратора</h5>
+            <h5 class="card-title mb-2">Съобщение от администратора</h5>
             <p class="mb-0">@Model.AdminMessage</p>
         </div>
     </div>
@@ -60,8 +59,7 @@
     </div>
 </div>
 
-<div class="mt-4">
-    <a asp-action="EditProfile" class="btn btn-primary">✏️ Редактирай профила</a>
-
-    <a asp-controller="Student" asp-action="Instructors" class="btn btn-success ms-2">📅 Запази час</a>
+<div class="mt-4 d-flex flex-wrap gap-2">
+    <a asp-action="EditProfile" class="btn btn-primary">Редактирай профила</a>
+    <a asp-controller="Student" asp-action="Instructors" class="btn btn-success">Запази час</a>
 </div>

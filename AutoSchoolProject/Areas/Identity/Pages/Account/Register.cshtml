@@ -1,49 +1,70 @@
 ﻿@page
 @model AutoSchoolProject.Areas.Identity.Pages.Account.RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Регистрация";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-grid">
+            <section class="auth-panel">
+                <div class="auth-brand">
+                    <img src="~/images/logo.png" alt="Лого" />
+                    <div>
+                        <div class="fw-bold text-uppercase">Автошкола</div>
+                        <div class="small">Система за управление</div>
+                    </div>
+                </div>
 
-<form method="post">
-    <div class="form-group">
-        <label asp-for="Input.FirstName"></label>
-        <input asp-for="Input.FirstName" class="form-control" />
-        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                <div class="auth-title">Регистрация</div>
+                <p class="auth-subtitle">Създай профил и след това използвай същия имейл и парола за заявката си за записване.</p>
+
+                <form method="post" class="auth-form">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.FirstName" class="form-label"></label>
+                        <input asp-for="Input.FirstName" class="form-control" placeholder="Въведи име" />
+                        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.LastName" class="form-label"></label>
+                        <input asp-for="Input.LastName" class="form-control" placeholder="Въведи фамилия" />
+                        <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label"></label>
+                        <input asp-for="Input.Email" class="form-control" placeholder="name@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label"></label>
+                        <input asp-for="Input.Password" class="form-control" placeholder="Минимум 6 символа" />
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                        <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Повтори паролата" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="auth-primary-btn">Регистрация</button>
+                </form>
+            </section>
+
+            <aside class="auth-side">
+                <div class="auth-tab">Вход</div>
+                <h2 class="h3 fw-bold text-uppercase mb-3">Вече имаш профил?</h2>
+                <p class="mb-4">Влез и подай заявка за записване. След одобрение ще можеш да използваш всички функции според ролята си.</p>
+
+                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-nav-accent align-self-start">Към вход</a>
+            </aside>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="Input.LastName"></label>
-        <input asp-for="Input.LastName" class="form-control" />
-        <span asp-validation-for="Input.LastName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Input.Email"></label>
-        <input asp-for="Input.Email" class="form-control" />
-        <span asp-validation-for="Input.Email" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Input.Password"></label>
-        <input asp-for="Input.Password" class="form-control" />
-        <span asp-validation-for="Input.Password" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Input.ConfirmPassword"></label>
-        <input asp-for="Input.ConfirmPassword" class="form-control" />
-        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary mt-2">Register</button>
-</form>
-
-<div class="mt-3">
-    <p>
-        Already have an account? <a asp-page="/Account/Login">Login</a>
-    </p>
 </div>
 
 @section Scripts {

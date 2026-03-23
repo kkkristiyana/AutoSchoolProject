@@ -4,7 +4,7 @@
     ViewData["Title"] = "Моите часове";
 }
 
-<h2 class="mb-3">📅 Моите часове</h2>
+<h2 class="mb-3">Моите часове</h2>
 
 @if (TempData["Error"] != null)
 {
@@ -21,14 +21,13 @@
 }
 else
 {
-    <table class="table table-hover">
+    <table class="table table-hover align-middle">
         <thead>
             <tr>
                 <th>Дата</th>
                 <th>Инструктор</th>
                 <th>Категория</th>
                 <th>Статус</th>
-                <th>Завършен</th>
                 <th>Бележка</th>
                 <th></th>
             </tr>
@@ -41,10 +40,9 @@ else
                     <td>@l.InstructorName</td>
                     <td>@l.CourseName</td>
                     <td>@l.Status</td>
-                    <td>@(l.Completed ? "✅" : "—")</td>
                     <td>@l.Note</td>
                     <td>
-                        @if (!l.Completed && l.DateTime > DateTime.Now && (l.Status == "Pending" || l.Status == "Approved"))
+                        @if (!l.Completed && l.DateTime > DateTime.Now && (l.Status == "Изчаква одобрение" || l.Status == "Одобрен"))
                         {
                             <form asp-action="CancelLesson" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()

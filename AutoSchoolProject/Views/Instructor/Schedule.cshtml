@@ -1,5 +1,95 @@
-﻿@{
-    ViewData["Title"] = "Schedule";
+﻿@model AutoSchoolProject.ViewModels.Instructor.InstructorScheduleViewModel
+@{
+    ViewData["Title"] = "График";
 }
 
-<h2>Моят график</h2>
+<partial name="_InstructorPanelNav" />
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div class="card shadow-sm p-3 mb-3">
+    <form method="get" asp-action="Schedule" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Филтър по статус</label>
+            <select name="status" class="form-select">
+                <option value="">Всички</option>
+                <option value="Available" selected="@(Model.SelectedStatus == "Available")">Свободни слотове</option>
+                <option value="Pending" selected="@(Model.SelectedStatus == "Pending")">Изчакват одобрение</option>
+                <option value="Approved" selected="@(Model.SelectedStatus == "Approved")">Одобрени</option>
+                <option value="Rejected" selected="@(Model.SelectedStatus == "Rejected")">Отказани</option>
+                <option value="Cancelled" selected="@(Model.SelectedStatus == "Cancelled")">Отменени</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Приложи</button>
+            <a class="btn btn-outline-secondary" asp-action="Schedule">Изчисти</a>
+        </div>
+    </form>
+</div>
+
+@if (!Model.Lessons.Any())
+{
+    <div class="alert alert-info">Няма намерени часове.</div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Дата и час</th>
+                        <th>Курсист</th>
+                        <th>Категория</th>
+                        <th>Статус</th>
+                        <th>Бележка</th>
+                        <th class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lesson in Model.Lessons)
+                    {
+                        <tr>
+                            <td>@lesson.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@(string.IsNullOrWhiteSpace(lesson.StudentName) ? "—" : lesson.StudentName)</td>
+                            <td>@lesson.CourseName</td>
+                            <td><span class="status-pill @lesson.StatusCssClass">@lesson.Status</span></td>
+                            <td>@lesson.Note</td>
+                            <td class="text-end">
+                                @if (lesson.Status == "Изчаква одобрение")
+                                {
+                                    <form asp-action="Approve" asp-route-id="@lesson.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-success">Приеми</button>
+                                    </form>
+                                    <form asp-action="Reject" asp-route-id="@lesson.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-warning">Откажи</button>
+                                    </form>
+                                }
+
+                                <a asp-action="Reschedule" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-primary">Пренасрочи</a>
+
+                                @if (lesson.Status != "Свободен слот" && lesson.Status != "Отказан" && lesson.Status != "Отменен" && lesson.Status != "Проведен")
+                                {
+                                    <a asp-action="Complete" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-success">Проведен</a>
+                                }
+
+                                @if (lesson.Status != "Отказан" && lesson.Status != "Отменен")
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@lesson.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-outline-danger">Отмени</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

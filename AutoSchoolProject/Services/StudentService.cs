@@ -91,11 +91,12 @@ namespace AutoSchoolProject.Services
             student.User.Email = model.Email;
             student.User.UserName = model.Email;
             student.User.PhoneNumber = model.PhoneNumber;
-
             student.CourseId = model.CourseId;
 
             if (!string.IsNullOrWhiteSpace(model.ProfileImagePath))
+            {
                 student.User.ProfileImagePath = model.ProfileImagePath;
+            }
 
             await _context.SaveChangesAsync();
         }
@@ -110,7 +111,7 @@ namespace AutoSchoolProject.Services
                 .Select(i => new InstructorListViewModel
                 {
                     Id = i.Id,
-                    FullName = i.User.FirstName + " " + i.User.LastName,
+                    FullName = (i.User.FirstName + " " + i.User.LastName).Trim(),
                     PhoneNumber = i.User.PhoneNumber,
                     Email = i.User.Email,
                     CourseName = i.Course != null ? i.Course.Name : "—",
@@ -129,10 +130,10 @@ namespace AutoSchoolProject.Services
             return new InstructorDetailsViewModel
             {
                 InstructorId = instructor.Id,
-                FullName = instructor.User.FirstName + " " + instructor.User.LastName,
+                FullName = (instructor.User.FirstName + " " + instructor.User.LastName).Trim(),
                 Email = instructor.User.Email,
                 PhoneNumber = instructor.User.PhoneNumber,
-                SchoolName = "Autoschool Lucky-Cars EOOD",
+                SchoolName = "Автошкола Lucky-Cars EOOD",
                 ProfileImagePath = instructor.User.ProfileImagePath,
                 CarModel = instructor.CarModel,
                 CarImagePath = instructor.CarImagePath
@@ -167,7 +168,7 @@ namespace AutoSchoolProject.Services
             return new BookLessonViewModel
             {
                 InstructorId = instructorId,
-                InstructorName = instructor.User.FirstName + " " + instructor.User.LastName,
+                InstructorName = (instructor.User.FirstName + " " + instructor.User.LastName).Trim(),
                 StudentId = student.Id,
                 CourseId = student.CourseId,
                 AvailableSlots = slots
@@ -186,10 +187,14 @@ namespace AutoSchoolProject.Services
                     l.Status == LessonStatus.Available);
 
             if (slot == null)
+            {
                 throw new InvalidOperationException("Избраният слот вече не е наличен.");
+            }
 
             if (slot.DateTime < DateTime.Now)
+            {
                 throw new InvalidOperationException("Не можеш да записваш час в миналото.");
+            }
 
             var start = slot.DateTime;
             var end = slot.DateTime.AddMinutes(slot.DurationMinutes);
@@ -203,7 +208,9 @@ namespace AutoSchoolProject.Services
                 start < l.DateTime.AddMinutes(l.DurationMinutes));
 
             if (overlaps)
+            {
                 throw new InvalidOperationException("Този час вече е зает.");
+            }
 
             slot.StudentId = student.Id;
             slot.CourseId = student.CourseId;
@@ -228,22 +235,23 @@ namespace AutoSchoolProject.Services
         {
             var student = await GetStudentAsync(user);
 
-            return await _context.PracticeLessons
+            var lessons = await _context.PracticeLessons
                 .Where(l => l.StudentId == student.Id)
                 .Include(l => l.Instructor).ThenInclude(i => i.User)
                 .Include(l => l.Course)
                 .OrderByDescending(l => l.DateTime)
-                .Select(l => new MyLessonListItemViewModel
-                {
-                    Id = l.Id,
-                    DateTime = l.DateTime,
-                    InstructorName = l.Instructor != null ? (l.Instructor.User.FirstName + " " + l.Instructor.User.LastName) : null,
-                    CourseName = l.Course != null ? l.Course.Name : null,
-                    Status = l.Status.ToString(),
-                    Completed = l.Completed,
-                    Note = l.Note
-                })
                 .ToListAsync();
+
+            return lessons.Select(l => new MyLessonListItemViewModel
+            {
+                Id = l.Id,
+                DateTime = l.DateTime,
+                InstructorName = l.Instructor != null ? ((l.Instructor.User.FirstName + " " + l.Instructor.User.LastName).Trim()) : null,
+                CourseName = l.Course != null ? l.Course.Name : null,
+                Status = GetLessonStatusText(l.Status, l.Completed),
+                Completed = l.Completed,
+                Note = l.Note
+            }).ToList();
         }
 
         public async Task CancelLessonAsync(ClaimsPrincipal user, int lessonId)
@@ -254,13 +262,19 @@ namespace AutoSchoolProject.Services
                 .FirstOrDefaultAsync(l => l.Id == lessonId && l.StudentId == student.Id);
 
             if (lesson == null)
+            {
                 throw new InvalidOperationException("Часът не е намерен.");
+            }
 
             if (lesson.DateTime <= DateTime.Now)
+            {
                 throw new InvalidOperationException("Не можеш да отменяш минали часове.");
+            }
 
             if (lesson.Status != LessonStatus.Pending && lesson.Status != LessonStatus.Approved)
+            {
                 throw new InvalidOperationException("Този час не може да бъде отменен.");
+            }
 
             lesson.Status = LessonStatus.Cancelled;
             await _context.SaveChangesAsync();
@@ -293,19 +307,20 @@ namespace AutoSchoolProject.Services
             var student = await GetStudentAsync(user);
             var now = DateTime.Now;
 
-            var practice = await _context.PracticeLessons
+            var practiceLessons = await _context.PracticeLessons
                 .Where(l => l.StudentId == student.Id && l.DateTime >= now)
                 .Include(l => l.Instructor).ThenInclude(i => i.User)
                 .OrderBy(l => l.DateTime)
-                .Select(l => new SchedulePracticeRowViewModel
-                {
-                    Id = l.Id,
-                    DateTime = l.DateTime,
-                    InstructorName = l.Instructor != null ? (l.Instructor.User.FirstName + " " + l.Instructor.User.LastName) : null,
-                    Status = l.Status.ToString(),
-                    Completed = l.Completed
-                })
                 .ToListAsync();
+
+            var practice = practiceLessons.Select(l => new SchedulePracticeRowViewModel
+            {
+                Id = l.Id,
+                DateTime = l.DateTime,
+                InstructorName = l.Instructor != null ? ((l.Instructor.User.FirstName + " " + l.Instructor.User.LastName).Trim()) : null,
+                Status = GetLessonStatusText(l.Status, l.Completed),
+                Completed = l.Completed
+            }).ToList();
 
             var theory = new List<ScheduleTheoryRowViewModel>();
             if (student.CourseId.HasValue)
@@ -336,6 +351,24 @@ namespace AutoSchoolProject.Services
             return await _context.PracticeLessons
                 .Where(l => l.InstructorId == instructorId)
                 .ToListAsync();
+        }
+
+        private static string GetLessonStatusText(LessonStatus status, bool completed)
+        {
+            if (completed)
+            {
+                return "Проведен";
+            }
+
+            return status switch
+            {
+                LessonStatus.Pending => "Изчаква одобрение",
+                LessonStatus.Approved => "Одобрен",
+                LessonStatus.Rejected => "Отказан",
+                LessonStatus.Cancelled => "Отменен",
+                LessonStatus.Available => "Свободен слот",
+                _ => status.ToString()
+            };
         }
     }
 }

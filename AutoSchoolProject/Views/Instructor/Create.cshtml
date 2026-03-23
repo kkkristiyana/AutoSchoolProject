@@ -1,32 +1,43 @@
-﻿@model AutoSchoolProject.ViewModels.Instructor.CreateLessonViewModel
-
+﻿@model AutoSchoolProject.ViewModels.Instructor.InstructorCreateSlotViewModel
 @{
-    ViewData["Title"] = "Създаване на урок";
+    ViewData["Title"] = "Създай свободен слот";
 }
 
-<h2 class="mb-4">Създаване на нов урок</h2>
+<partial name="_InstructorPanelNav" />
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="StudentId" class="form-label"></label>
-        <select asp-for="StudentId" asp-items="Model.Students" class="form-select">
-            <option value="">-- Избери курсист --</option>
-        </select>
-        <span asp-validation-for="StudentId" class="text-danger"></span>
-    </div>
+<div class="card shadow-sm p-4">
+    <h2 class="h4 mb-3">Създай свободен слот</h2>
+    <p class="text-muted">Слотът автоматично ще бъде към категория <strong>@Model.CourseName</strong>.</p>
 
-    <div class="mb-3">
-        <label asp-for="DateTime" class="form-label"></label>
-        <input asp-for="DateTime" type="datetime-local" class="form-control" />
-        <span asp-validation-for="DateTime" class="text-danger"></span>
-    </div>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div class="mb-3">
-        <label asp-for="DurationMinutes" class="form-label"></label>
-        <input asp-for="DurationMinutes" class="form-control" />
-        <span asp-validation-for="DurationMinutes" class="text-danger"></span>
-    </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label asp-for="DateTime" class="form-label"></label>
+                <input asp-for="DateTime" type="datetime-local" class="form-control" value="@Model.DateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="DateTime" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="DurationMinutes" class="form-label"></label>
+                <input asp-for="DurationMinutes" class="form-control" />
+                <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Note" class="form-label"></label>
+                <textarea asp-for="Note" class="form-control" rows="3" placeholder="Например: Свободен слот за градско шофиране"></textarea>
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+        </div>
 
-    <button type="submit" class="btn btn-success">Създай</button>
-    <a asp-action="Index" class="btn btn-secondary">Назад</a>
-</form>
+        <div class="mt-4 d-flex flex-wrap gap-2">
+            <button type="submit" class="btn btn-success">Създай слот</button>
+            <a asp-action="Schedule" class="btn btn-outline-secondary">Назад към графика</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

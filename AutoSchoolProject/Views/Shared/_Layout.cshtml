@@ -3,99 +3,114 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AutoSchoolProject</title>
+    <title>@ViewData["Title"] - Автошкола</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AutoSchoolProject.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
-
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                
+        <nav class="navbar navbar-expand-lg main-navbar box-shadow-sm">
+            <div class="container-fluid px-3 px-lg-4">
+                <a class="navbar-brand d-flex align-items-center gap-3" asp-area="" asp-controller="Home" asp-action="@(User.Identity?.IsAuthenticated == true ? "Index" : "IndexForViewerOnly")">
+                    <img src="~/images/logo.png" alt="Лого на автошколата" class="brand-logo" />
+                    <span class="brand-text-wrap">
+                        <span class="brand-title">АВТОШКОЛА</span>
+                        <span class="brand-subtitle">Система за управление</span>
+                    </span>
+                </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Покажи навигацията">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        @if (User.Identity.IsAuthenticated == false)
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        @if (User.Identity?.IsAuthenticated != true)
                         {
-                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="IndexForViewerOnly">AutoSchoolProject</a>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="IndexForViewerOnly">Начало</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="IndexForViewerOnly">Начало</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="ConditionsViewerOnly">Условия</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="ConditionsViewerOnly">Условия</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="ContactsViewerOnly">Контакти</a>
-                            </li>
-
-                        }
-                        
-                        else if (User.Identity != null && User.IsInRole("Student"))
-                        {
-                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Student" asp-action="Profile">👤 Моят профил</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Student" asp-action="Schedule">🗓️ График</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Student" asp-action="MyLessons">📅 Моите часове</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Student" asp-action="TestResults">📝 Тестове</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Student" asp-action="Instructors">➕ Запази час</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="ContactsViewerOnly">Контакти</a>
                             </li>
                         }
-
-                        else if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Instructor"))
+                        else if (User.IsInRole("Student"))
                         {
-                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Instructor" asp-action="Index">🧑‍🏫 Инструктор</a>
+                                <a class="nav-link" asp-controller="Student" asp-action="Profile">Профил</a>
                             </li>
-
-                        }
-
-                        else if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-                        {
-                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin</a>
+                                <a class="nav-link" asp-controller="Student" asp-action="EditProfile">Редакция на профил</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Student" asp-action="Schedule">График</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Student" asp-action="MyLessons">Моите часове</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Student" asp-action="TestResults">Тестове</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-accent" asp-controller="Student" asp-action="Instructors">Запази час</a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Instructor"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Instructor" asp-action="Profile">Профил</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Instructor" asp-action="EditProfile">Редакция на профил</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Instructor" asp-action="Create">Създай свободен слот</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Instructor" asp-action="PendingLessons">Заявки за час</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Instructor" asp-action="Schedule">График</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Instructor" asp-action="MyStudents">Курсисти</a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-accent" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Админ панел</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Начало</a>
                             </li>
                         }
                         else
                         {
-                            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoSchoolProject</a>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Начало</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Начало</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Courses">Курсове</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="Courses">Курсове</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Conditions">Условия</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="Conditions">Условия</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Contacts">Контакти</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="Contacts">Контакти</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
+                                <a class="nav-link nav-link-accent" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
                             </li>
-
                         }
                     </ul>
 
@@ -105,22 +120,23 @@
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="page-shell">
+        <main role="main" class="container pb-4">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - AutoSchoolProject
+    <footer class="site-footer">
+        <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
+            <span>&copy; 2026 Автошкола</span>
+            <span>Управление на курсове, графици и практика</span>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

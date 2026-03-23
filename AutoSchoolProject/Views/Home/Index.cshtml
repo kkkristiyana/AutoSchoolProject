@@ -2,44 +2,87 @@
     ViewData["Title"] = "Начало";
 }
 
-<div class="p-4 p-md-5 mb-4 bg-light rounded-3 border">
-    <div class="container-fluid py-2">
-        <h1 class="display-6 mb-2">Автошкола – система за управление</h1>
-        <p class="text-muted mb-3">
-            Курсове, записване за практика, графици, тестове и админ/инструктор панел.
-        </p>
+<section class="home-hero">
+    <div class="home-hero-grid">
+        <div class="home-hero-copy">
+            <span class="hero-kicker">Онлайн управление на автошкола</span>
+            <h1>Учи уверено. <span>Карай спокойно.</span></h1>
+            <p>
+                Следи курсовете си, подавай заявка за записване, виж свободните часове по практика
+                и управлявай целия процес на едно място.
+            </p>
 
-        <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-primary" asp-controller="Home" asp-action="Courses">Курсове и цени</a>
-            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
-            <a class="btn btn-outline-dark" asp-controller="Home" asp-action="Contacts">Контакти</a>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Courses">Курсове и цени</a>
+                <a class="btn btn-warning" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
+                <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Contacts">Контакти</a>
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="row g-3">
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Посетител</h5>
-                <p class="card-text">Разглежда информация и изпраща заявка за записване.</p>
+        <div class="home-hero-visual">
+            <div class="placeholder-media">Място за основна снимка</div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <h2 class="home-section-title">Нашите услуги</h2>
+    <p class="home-section-subtitle">Избери категория, следи графика си и управлявай практиката си лесно.</p>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="home-service-card">
+                <div class="placeholder-media">Снимка 1</div>
+                <h5>Курсове и категории</h5>
+                <p>Разгледай наличните категории, цени и задължителни практически часове.</p>
+                <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Courses">Виж курсовете</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="home-service-card">
+                <div class="placeholder-media">Снимка 2</div>
+                <h5>Записване и практика</h5>
+                <p>Подай заявка за записване и след одобрение си резервирай свободни часове.</p>
+                @if (User.IsInRole("Student"))
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Student" asp-action="Instructors">Запази час</a>
+                }
+                else if (User.IsInRole("Instructor"))
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Instructor" asp-action="Create">Създай слот</a>
+                }
+                else if (User.IsInRole("Admin"))
+                {
+                    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Към администрацията</a>
+                }
+                else
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Apply">Подай заявка</a>
+                }
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="home-service-card">
+                <div class="placeholder-media">Снимка 3</div>
+                <h5>График и напредък</h5>
+                <p>Следи предстоящите занятия, проведените часове и резултатите от тестовете.</p>
+                @if (User.IsInRole("Student"))
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Student" asp-action="Schedule">Виж график</a>
+                }
+                else if (User.IsInRole("Instructor"))
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Instructor" asp-action="Schedule">Виж график</a>
+                }
+                else if (User.IsInRole("Admin"))
+                {
+                    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Lessons" asp-action="Index">Виж часове</a>
+                }
+                else
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Conditions">Условия</a>
+                }
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Курсист</h5>
-                <p class="card-text">Записва часове от свободни слотове, вижда график и тестове.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Инструктор / Админ</h5>
-                <p class="card-text">Одобряване/отказ на часове, отбелязване проведен час, справки.</p>
-            </div>
-        </div>
-    </div>
-</div>
+</section>

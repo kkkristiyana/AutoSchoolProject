@@ -1,29 +1,38 @@
-﻿@model AutoSchoolProject.ViewModels.Instructor.RescheduleLessonViewModel
-
+﻿@model AutoSchoolProject.ViewModels.Instructor.InstructorRescheduleLessonViewModel
 @{
-    ViewData["Title"] = "Промяна на час";
+    ViewData["Title"] = "Пренасрочване на час";
 }
 
-<h2 class="mb-3">Промени час</h2>
+<partial name="_InstructorPanelNav" />
 
-<div class="card">
+<div class="card shadow-sm">
     <div class="card-body">
+        <h2 class="h4 mb-3">Пренасрочване на час</h2>
         <p class="mb-1"><strong>Курсист:</strong> @Model.StudentName</p>
         <p class="mb-3"><strong>Текущ час:</strong> @Model.CurrentDateTime.ToString("dd.MM.yyyy HH:mm")</p>
 
         <form asp-action="Reschedule" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="LessonId" />
+            <input type="hidden" asp-for="StudentName" />
+            <input type="hidden" asp-for="CurrentDateTime" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-3">
-                <label class="form-label">Нов час</label>
-                <input name="NewDateTime" type="datetime-local" class="form-control"
-                       value="@Model.NewDateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                <label asp-for="NewDateTime" class="form-label"></label>
+                <input asp-for="NewDateTime" type="datetime-local" class="form-control" value="@Model.NewDateTime.ToString("yyyy-MM-ddTHH:mm")" />
                 <span asp-validation-for="NewDateTime" class="text-danger"></span>
             </div>
 
+            <div class="mb-3">
+                <label asp-for="DurationMinutes" class="form-label"></label>
+                <input asp-for="DurationMinutes" class="form-control" />
+                <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+            </div>
+
             <button type="submit" class="btn btn-primary">Запази</button>
-            <a class="btn btn-outline-secondary" asp-action="Index">Назад</a>
+            <a class="btn btn-outline-secondary" asp-action="Schedule">Назад</a>
         </form>
     </div>
 </div>
