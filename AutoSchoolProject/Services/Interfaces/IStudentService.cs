@@ -11,7 +11,10 @@ namespace AutoSchoolProject.Services.Interfaces
         Task UpdateProfileAsync(ClaimsPrincipal user, EditStudentProfileViewModel model);
 
         Task<List<InstructorListViewModel>> GetInstructorsAsync();
+        Task<List<InstructorListViewModel>> GetInstructorsAsync(ClaimsPrincipal user);
+
         Task<InstructorDetailsViewModel> GetInstructorDetailsAsync(int instructorId);
+        Task<InstructorDetailsViewModel> GetInstructorDetailsAsync(ClaimsPrincipal user, int instructorId);
 
         Task<BookLessonViewModel> GetBookLessonAsync(ClaimsPrincipal user, int instructorId);
         Task BookLessonAsync(ClaimsPrincipal user, BookLessonViewModel model);
@@ -21,6 +24,5 @@ namespace AutoSchoolProject.Services.Interfaces
         Task CancelLessonAsync(ClaimsPrincipal user, int lessonId);
         Task<StudentScheduleViewModel> GetScheduleAsync(ClaimsPrincipal user);
         Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId);
-
     }
 }

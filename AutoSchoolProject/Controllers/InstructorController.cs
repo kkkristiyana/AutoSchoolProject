@@ -233,6 +233,12 @@ namespace AutoSchoolProject.Controllers
                 return NotFound();
             }
 
+            if (!CanReschedule(lesson))
+            {
+                TempData["Error"] = "Този час не може да бъде пренасрочен.";
+                return RedirectToAction(nameof(Schedule));
+            }
+
             return View(new InstructorRescheduleLessonViewModel
             {
                 LessonId = lesson.Id,
@@ -257,6 +263,12 @@ namespace AutoSchoolProject.Controllers
             if (lesson == null)
             {
                 return NotFound();
+            }
+
+            if (!CanReschedule(lesson))
+            {
+                TempData["Error"] = "Този час не може да бъде пренасрочен.";
+                return RedirectToAction(nameof(Schedule));
             }
 
             if (!ModelState.IsValid)
@@ -301,6 +313,12 @@ namespace AutoSchoolProject.Controllers
                 return NotFound();
             }
 
+            if (!CanApprove(lesson))
+            {
+                TempData["Error"] = "Само чакащ час може да бъде приет.";
+                return RedirectToAction(nameof(PendingLessons));
+            }
+
             lesson.Status = LessonStatus.Approved;
             await _context.SaveChangesAsync();
             TempData["Success"] = "Заявката за час беше приета.";
@@ -319,6 +337,12 @@ namespace AutoSchoolProject.Controllers
                 return NotFound();
             }
 
+            if (!CanReject(lesson))
+            {
+                TempData["Error"] = "Само чакащ час може да бъде отказан.";
+                return RedirectToAction(nameof(PendingLessons));
+            }
+
             lesson.Status = LessonStatus.Rejected;
             await _context.SaveChangesAsync();
             TempData["Success"] = "Заявката за час беше отказана.";
@@ -335,6 +359,12 @@ namespace AutoSchoolProject.Controllers
             if (lesson == null)
             {
                 return NotFound();
+            }
+
+            if (!CanCancel(lesson))
+            {
+                TempData["Error"] = "Този час не може да бъде отменен.";
+                return RedirectToAction(nameof(Schedule));
             }
 
             lesson.Status = LessonStatus.Cancelled;
@@ -356,6 +386,12 @@ namespace AutoSchoolProject.Controllers
             if (lesson == null)
             {
                 return NotFound();
+            }
+
+            if (!CanComplete(lesson))
+            {
+                TempData["Error"] = "Само одобрен и непроведен час може да бъде отбелязан като проведен.";
+                return RedirectToAction(nameof(Schedule));
             }
 
             return View(new InstructorCompleteLessonViewModel
@@ -380,12 +416,14 @@ namespace AutoSchoolProject.Controllers
                 return NotFound();
             }
 
-            lesson.Completed = true;
-            if (lesson.Status == LessonStatus.Pending)
+            if (!CanComplete(lesson))
             {
-                lesson.Status = LessonStatus.Approved;
+                TempData["Error"] = "Само одобрен и непроведен час може да бъде отбелязан като проведен.";
+                return RedirectToAction(nameof(Schedule));
             }
 
+            lesson.Completed = true;
+            lesson.Status = LessonStatus.Approved;
             lesson.Note = model.Note?.Trim();
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът беше отбелязан като проведен.";
@@ -448,6 +486,38 @@ namespace AutoSchoolProject.Controllers
         {
             ViewBag.InstructorName = GetInstructorName(instructor);
         }
+
+        private static bool CanApprove(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.StudentId.HasValue
+               && lesson.Status == LessonStatus.Pending
+               && lesson.DateTime > DateTime.Now;
+
+        private static bool CanReject(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.StudentId.HasValue
+               && lesson.Status == LessonStatus.Pending
+               && lesson.DateTime > DateTime.Now;
+
+        private static bool CanCancel(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.DateTime > DateTime.Now
+               && (lesson.Status == LessonStatus.Available
+                   || lesson.Status == LessonStatus.Pending
+                   || lesson.Status == LessonStatus.Approved);
+
+        private static bool CanReschedule(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.DateTime > DateTime.Now
+               && (lesson.Status == LessonStatus.Available
+                   || lesson.Status == LessonStatus.Pending
+                   || lesson.Status == LessonStatus.Approved);
+
+        private static bool CanComplete(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.StudentId.HasValue
+               && lesson.Status == LessonStatus.Approved
+               && lesson.DateTime <= DateTime.Now;
 
         private static InstructorLessonRowViewModel MapLessonRow(PracticeLesson lesson)
         {

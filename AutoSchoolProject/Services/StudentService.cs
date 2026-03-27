@@ -60,24 +60,13 @@ namespace AutoSchoolProject.Services
         {
             var student = await GetStudentAsync(user);
 
-            var courses = await _context.Courses
-                .AsNoTracking()
-                .OrderBy(c => c.Name)
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = $"{c.Name} - {c.Price:F2} лв"
-                })
-                .ToListAsync();
-
             return new EditStudentProfileViewModel
             {
                 FirstName = student.User.FirstName ?? string.Empty,
                 LastName = student.User.LastName ?? string.Empty,
                 Email = student.User.Email ?? string.Empty,
                 PhoneNumber = student.User.PhoneNumber,
-                CourseId = student.CourseId,
-                Courses = courses,
+                CourseName = student.Course?.Name,
                 CurrentProfileImagePath = student.User.ProfileImagePath
             };
         }
@@ -86,12 +75,11 @@ namespace AutoSchoolProject.Services
         {
             var student = await GetStudentAsync(user);
 
-            student.User.FirstName = model.FirstName;
-            student.User.LastName = model.LastName;
-            student.User.Email = model.Email;
-            student.User.UserName = model.Email;
-            student.User.PhoneNumber = model.PhoneNumber;
-            student.CourseId = model.CourseId;
+            student.User.FirstName = model.FirstName.Trim();
+            student.User.LastName = model.LastName.Trim();
+            student.User.Email = model.Email.Trim();
+            student.User.UserName = model.Email.Trim();
+            student.User.PhoneNumber = model.PhoneNumber?.Trim();
 
             if (!string.IsNullOrWhiteSpace(model.ProfileImagePath))
             {
@@ -106,6 +94,33 @@ namespace AutoSchoolProject.Services
             return await _context.Instructors
                 .Include(i => i.User)
                 .Include(i => i.Course)
+                .OrderBy(i => i.User.FirstName)
+                .ThenBy(i => i.User.LastName)
+                .Select(i => new InstructorListViewModel
+                {
+                    Id = i.Id,
+                    FullName = (i.User.FirstName + " " + i.User.LastName).Trim(),
+                    PhoneNumber = i.User.PhoneNumber,
+                    Email = i.User.Email,
+                    CourseName = i.Course != null ? i.Course.Name : "—",
+                    Category = i.Course != null ? i.Course.Name : "—"
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<InstructorListViewModel>> GetInstructorsAsync(ClaimsPrincipal user)
+        {
+            var student = await GetStudentAsync(user);
+
+            if (!student.CourseId.HasValue)
+            {
+                return new List<InstructorListViewModel>();
+            }
+
+            return await _context.Instructors
+                .Include(i => i.User)
+                .Include(i => i.Course)
+                .Where(i => i.CourseId == student.CourseId)
                 .OrderBy(i => i.User.FirstName)
                 .ThenBy(i => i.User.LastName)
                 .Select(i => new InstructorListViewModel
@@ -140,13 +155,56 @@ namespace AutoSchoolProject.Services
             };
         }
 
+        public async Task<InstructorDetailsViewModel> GetInstructorDetailsAsync(ClaimsPrincipal user, int instructorId)
+        {
+            var student = await GetStudentAsync(user);
+
+            if (!student.CourseId.HasValue)
+            {
+                throw new InvalidOperationException("Все още нямаш зададена категория от администратор.");
+            }
+
+            var instructor = await _context.Instructors
+                .Include(i => i.User)
+                .Include(i => i.Course)
+                .FirstOrDefaultAsync(i => i.Id == instructorId && i.CourseId == student.CourseId);
+
+            if (instructor == null)
+            {
+                throw new InvalidOperationException("Този инструктор не е за твоята категория.");
+            }
+
+            return new InstructorDetailsViewModel
+            {
+                InstructorId = instructor.Id,
+                FullName = (instructor.User.FirstName + " " + instructor.User.LastName).Trim(),
+                Email = instructor.User.Email,
+                PhoneNumber = instructor.User.PhoneNumber,
+                SchoolName = "Автошкола Lucky-Cars EOOD",
+                ProfileImagePath = instructor.User.ProfileImagePath,
+                CarModel = instructor.CarModel,
+                CarImagePath = instructor.CarImagePath
+            };
+        }
+
         public async Task<BookLessonViewModel> GetBookLessonAsync(ClaimsPrincipal user, int instructorId)
         {
             var student = await GetStudentAsync(user);
 
+            if (!student.CourseId.HasValue)
+            {
+                throw new InvalidOperationException("Все още нямаш зададена категория от администратор.");
+            }
+
             var instructor = await _context.Instructors
                 .Include(i => i.User)
-                .FirstAsync(i => i.Id == instructorId);
+                .Include(i => i.Course)
+                .FirstOrDefaultAsync(i => i.Id == instructorId && i.CourseId == student.CourseId);
+
+            if (instructor == null)
+            {
+                throw new InvalidOperationException("Не можеш да записваш час при инструктор от друга категория.");
+            }
 
             var now = DateTime.Now;
 
@@ -155,7 +213,7 @@ namespace AutoSchoolProject.Services
                             && l.StudentId == null
                             && l.Status == LessonStatus.Available
                             && l.DateTime >= now
-                            && (!student.CourseId.HasValue || l.CourseId == null || l.CourseId == student.CourseId))
+                            && l.CourseId == student.CourseId)
                 .OrderBy(l => l.DateTime)
                 .Take(50)
                 .Select(l => new SelectListItem
@@ -179,7 +237,13 @@ namespace AutoSchoolProject.Services
         {
             var student = await GetStudentAsync(user);
 
+            if (!student.CourseId.HasValue)
+            {
+                throw new InvalidOperationException("Все още нямаш зададена категория от администратор.");
+            }
+
             var slot = await _context.PracticeLessons
+                .Include(l => l.Instructor)
                 .FirstOrDefaultAsync(l =>
                     l.Id == model.SlotId &&
                     l.InstructorId == model.InstructorId &&
@@ -196,27 +260,36 @@ namespace AutoSchoolProject.Services
                 throw new InvalidOperationException("Не можеш да записваш час в миналото.");
             }
 
+            if (slot.Instructor?.CourseId != student.CourseId || slot.CourseId != student.CourseId)
+            {
+                throw new InvalidOperationException("Не можеш да записваш час при инструктор от друга категория.");
+            }
+
             var start = slot.DateTime;
             var end = slot.DateTime.AddMinutes(slot.DurationMinutes);
 
-            bool overlaps = await _context.PracticeLessons.AnyAsync(l =>
-                l.InstructorId == model.InstructorId &&
+            bool studentOverlaps = await _context.PracticeLessons.AnyAsync(l =>
+                l.StudentId == student.Id &&
                 l.Id != slot.Id &&
                 l.Status != LessonStatus.Cancelled &&
                 l.Status != LessonStatus.Rejected &&
                 l.DateTime < end &&
                 start < l.DateTime.AddMinutes(l.DurationMinutes));
 
-            if (overlaps)
+            if (studentOverlaps)
             {
-                throw new InvalidOperationException("Този час вече е зает.");
+                throw new InvalidOperationException("Имаш друг час, който се припокрива с този.");
             }
 
             slot.StudentId = student.Id;
             slot.CourseId = student.CourseId;
             slot.Status = LessonStatus.Pending;
             slot.Completed = false;
-            slot.Note = string.IsNullOrWhiteSpace(slot.Note) ? "Запазен час" : slot.Note;
+
+            if (string.IsNullOrWhiteSpace(slot.Note) || string.Equals(slot.Note, "Свободен слот", StringComparison.OrdinalIgnoreCase))
+            {
+                slot.Note = "Запазен час";
+            }
 
             await _context.SaveChangesAsync();
         }
@@ -259,6 +332,7 @@ namespace AutoSchoolProject.Services
             var student = await GetStudentAsync(user);
 
             var lesson = await _context.PracticeLessons
+                .Include(l => l.Instructor)
                 .FirstOrDefaultAsync(l => l.Id == lessonId && l.StudentId == student.Id);
 
             if (lesson == null)
@@ -276,7 +350,16 @@ namespace AutoSchoolProject.Services
                 throw new InvalidOperationException("Този час не може да бъде отменен.");
             }
 
-            lesson.Status = LessonStatus.Cancelled;
+            lesson.StudentId = null;
+            lesson.Completed = false;
+            lesson.Status = LessonStatus.Available;
+            lesson.CourseId = lesson.Instructor?.CourseId ?? lesson.CourseId;
+
+            if (string.IsNullOrWhiteSpace(lesson.Note) || string.Equals(lesson.Note, "Запазен час", StringComparison.OrdinalIgnoreCase))
+            {
+                lesson.Note = "Свободен слот";
+            }
+
             await _context.SaveChangesAsync();
         }
 
@@ -349,7 +432,9 @@ namespace AutoSchoolProject.Services
         public async Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId)
         {
             return await _context.PracticeLessons
-                .Where(l => l.InstructorId == instructorId)
+                .Where(l => l.InstructorId == instructorId
+                    && l.Status != LessonStatus.Cancelled
+                    && l.Status != LessonStatus.Rejected)
                 .ToListAsync();
         }
 

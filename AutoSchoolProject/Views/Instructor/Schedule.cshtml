@@ -3,10 +3,13 @@
     ViewData["Title"] = "График";
 }
 
-
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
 <div class="card shadow-sm p-3 mb-3">
@@ -51,6 +54,11 @@ else
                 <tbody>
                     @foreach (var lesson in Model.Lessons)
                     {
+                        var canApproveReject = !lesson.Completed && lesson.Status == "Изчаква одобрение" && lesson.DateTime > DateTime.Now;
+                        var canReschedule = !lesson.Completed && lesson.DateTime > DateTime.Now && (lesson.Status == "Свободен слот" || lesson.Status == "Изчаква одобрение" || lesson.Status == "Одобрен");
+                        var canComplete = !lesson.Completed && lesson.Status == "Одобрен" && !string.IsNullOrWhiteSpace(lesson.StudentName) && lesson.DateTime <= DateTime.Now;
+                        var canCancel = !lesson.Completed && lesson.DateTime > DateTime.Now && (lesson.Status == "Свободен слот" || lesson.Status == "Изчаква одобрение" || lesson.Status == "Одобрен");
+
                         <tr>
                             <td>@lesson.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
                             <td>@(string.IsNullOrWhiteSpace(lesson.StudentName) ? "—" : lesson.StudentName)</td>
@@ -58,7 +66,7 @@ else
                             <td><span class="status-pill @lesson.StatusCssClass">@lesson.Status</span></td>
                             <td>@lesson.Note</td>
                             <td class="text-end">
-                                @if (lesson.Status == "Изчаква одобрение")
+                                @if (canApproveReject)
                                 {
                                     <form asp-action="Approve" asp-route-id="@lesson.Id" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
@@ -70,19 +78,27 @@ else
                                     </form>
                                 }
 
-                                <a asp-action="Reschedule" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-primary">Пренасрочи</a>
+                                @if (canReschedule)
+                                {
+                                    <a asp-action="Reschedule" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-primary">Пренасрочи</a>
+                                }
 
-                                @if (lesson.Status != "Свободен слот" && lesson.Status != "Отказан" && lesson.Status != "Отменен" && lesson.Status != "Проведен")
+                                @if (canComplete)
                                 {
                                     <a asp-action="Complete" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-success">Проведен</a>
                                 }
 
-                                @if (lesson.Status != "Отказан" && lesson.Status != "Отменен")
+                                @if (canCancel)
                                 {
                                     <form asp-action="Cancel" asp-route-id="@lesson.Id" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
                                         <button class="btn btn-sm btn-outline-danger">Отмени</button>
                                     </form>
+                                }
+
+                                @if (!canApproveReject && !canReschedule && !canComplete && !canCancel)
+                                {
+                                    <span class="text-muted">—</span>
                                 }
                             </td>
                         </tr>
@@ -91,5 +107,5 @@ else
             </table>
         </div>
     </div>
-    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Назад към началната страница</a>
+    <a class="btn btn-outline-secondary mt-3" asp-controller="Home" asp-action="Index">Назад към началната страница</a>
 }

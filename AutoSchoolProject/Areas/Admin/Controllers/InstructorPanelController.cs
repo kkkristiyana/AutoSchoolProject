@@ -280,6 +280,12 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             if (instructor == null) return NotFound();
             SetInstructorContext(instructor.Id, GetInstructorName(instructor));
 
+            if (!CanRescheduleLesson(lesson))
+            {
+                TempData["Error"] = "Този час не може да бъде пренасрочен.";
+                return RedirectToAction(nameof(Lessons), new { instructorId });
+            }
+
             return View(new InstructorPanelRescheduleLessonViewModel
             {
                 LessonId = lesson.Id,
@@ -289,6 +295,7 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 DurationMinutes = lesson.DurationMinutes
             });
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -301,6 +308,12 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             if (lesson == null) return NotFound();
             SetInstructorContext(instructorId, lesson.Instructor != null ? GetInstructorName(lesson.Instructor) : "Инструктор");
+
+            if (!CanRescheduleLesson(lesson))
+            {
+                TempData["Error"] = "Този час не може да бъде пренасрочен.";
+                return RedirectToAction(nameof(Lessons), new { instructorId });
+            }
 
             if (!ModelState.IsValid)
                 return View(model);
@@ -340,6 +353,12 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             if (lesson == null) return NotFound();
             SetInstructorContext(instructorId, lesson.Instructor != null ? GetInstructorName(lesson.Instructor) : "Инструктор");
 
+            if (!CanCompleteLesson(lesson))
+            {
+                TempData["Error"] = "Само одобрен и непроведен час може да бъде отбелязан като проведен.";
+                return RedirectToAction(nameof(Lessons), new { instructorId });
+            }
+
             return View(new InstructorPanelCompleteLessonViewModel
             {
                 LessonId = lesson.Id,
@@ -348,6 +367,7 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 Note = lesson.Note
             });
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -360,9 +380,14 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             if (lesson == null) return NotFound();
             SetInstructorContext(instructorId, lesson.Instructor != null ? GetInstructorName(lesson.Instructor) : "Инструктор");
 
+            if (!CanCompleteLesson(lesson))
+            {
+                TempData["Error"] = "Само одобрен и непроведен час може да бъде отбелязан като проведен.";
+                return RedirectToAction(nameof(Lessons), new { instructorId });
+            }
+
             lesson.Completed = true;
-            if (lesson.Status == LessonStatus.Pending)
-                lesson.Status = LessonStatus.Approved;
+            lesson.Status = LessonStatus.Approved;
             lesson.Note = model.Note;
 
             await _context.SaveChangesAsync();
@@ -370,12 +395,19 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             return RedirectToAction(nameof(Lessons), new { instructorId });
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveLesson(int instructorId, int id)
         {
             var lesson = await _context.PracticeLessons.FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructorId);
             if (lesson == null) return NotFound();
+
+            if (!CanApproveLesson(lesson))
+            {
+                TempData["Error"] = "Само чакащ час може да бъде приет.";
+                return RedirectToAction(nameof(Lessons), new { instructorId });
+            }
 
             lesson.Status = LessonStatus.Approved;
             await _context.SaveChangesAsync();
@@ -390,11 +422,18 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             var lesson = await _context.PracticeLessons.FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructorId);
             if (lesson == null) return NotFound();
 
+            if (!CanRejectLesson(lesson))
+            {
+                TempData["Error"] = "Само чакащ час може да бъде отказан.";
+                return RedirectToAction(nameof(Lessons), new { instructorId });
+            }
+
             lesson.Status = LessonStatus.Rejected;
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът е отказан.";
             return RedirectToAction(nameof(Lessons), new { instructorId });
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -403,11 +442,18 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             var lesson = await _context.PracticeLessons.FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructorId);
             if (lesson == null) return NotFound();
 
+            if (!CanCancelLesson(lesson))
+            {
+                TempData["Error"] = "Този час не може да бъде отменен.";
+                return RedirectToAction(nameof(Lessons), new { instructorId });
+            }
+
             lesson.Status = LessonStatus.Cancelled;
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът е отменен.";
             return RedirectToAction(nameof(Lessons), new { instructorId });
         }
+
 
         public async Task<IActionResult> Students(int instructorId)
         {
@@ -482,5 +528,37 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 })
                 .ToListAsync();
         }
+        //helpers
+        private static bool CanApproveLesson(PracticeLesson lesson)
+    => !lesson.Completed
+       && lesson.StudentId.HasValue
+       && lesson.Status == LessonStatus.Pending
+       && lesson.DateTime > DateTime.Now;
+
+        private static bool CanRejectLesson(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.StudentId.HasValue
+               && lesson.Status == LessonStatus.Pending
+               && lesson.DateTime > DateTime.Now;
+
+        private static bool CanCancelLesson(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.DateTime > DateTime.Now
+               && (lesson.Status == LessonStatus.Available
+                   || lesson.Status == LessonStatus.Pending
+                   || lesson.Status == LessonStatus.Approved);
+
+        private static bool CanRescheduleLesson(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.DateTime > DateTime.Now
+               && (lesson.Status == LessonStatus.Available
+                   || lesson.Status == LessonStatus.Pending
+                   || lesson.Status == LessonStatus.Approved);
+
+        private static bool CanCompleteLesson(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.StudentId.HasValue
+               && lesson.Status == LessonStatus.Approved
+               && lesson.DateTime <= DateTime.Now;
     }
 }

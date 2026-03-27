@@ -112,7 +112,7 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 var refreshed = await _studentService.GetEditProfileAsync(principal);
-                model.Courses = refreshed.Courses;
+                model.CourseName = refreshed.CourseName;
                 model.CurrentProfileImagePath = refreshed.CurrentProfileImagePath;
                 return View(model);
             }
@@ -135,28 +135,49 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
         public async Task<IActionResult> Instructors(int studentId)
         {
-            var (_, name, id) = await ImpersonateStudentAsync(studentId);
+            var (principal, name, id) = await ImpersonateStudentAsync(studentId);
             SetStudentContext(id, name);
-            var model = await _studentService.GetInstructorsAsync();
+            var model = await _studentService.GetInstructorsAsync(principal);
             return View(model);
         }
 
+
         public async Task<IActionResult> InstructorDetails(int studentId, int id)
         {
-            var (_, name, sid) = await ImpersonateStudentAsync(studentId);
+            var (principal, name, sid) = await ImpersonateStudentAsync(studentId);
             SetStudentContext(sid, name);
-            var model = await _studentService.GetInstructorDetailsAsync(id);
-            return View(model);
+
+            try
+            {
+                var model = await _studentService.GetInstructorDetailsAsync(principal, id);
+                return View(model);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Instructors), new { studentId = sid });
+            }
         }
+
 
         [HttpGet]
         public async Task<IActionResult> BookLesson(int studentId, int instructorId)
         {
             var (principal, name, sid) = await ImpersonateStudentAsync(studentId);
             SetStudentContext(sid, name);
-            var model = await _studentService.GetBookLessonAsync(principal, instructorId);
-            return View(model);
+
+            try
+            {
+                var model = await _studentService.GetBookLessonAsync(principal, instructorId);
+                return View(model);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Instructors), new { studentId = sid });
+            }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

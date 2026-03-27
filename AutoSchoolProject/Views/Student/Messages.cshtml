@@ -1,0 +1,23 @@
+﻿@model AutoSchoolProject.ViewModels.Student.StudentProfileViewModel
+
+@{
+    ViewData["Title"] = "Съобщения";
+}
+
+<h2 class="mb-4">Съобщения</h2>
+
+@if (string.IsNullOrWhiteSpace(Model.AdminMessage))
+{
+    <div class="alert alert-info">Все още нямаш съобщение от администратора.</div>
+}
+else
+{
+    <div class="card border-info shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-2">Съобщение от администратора</h5>
+            <p class="mb-3">@Model.AdminMessage</p>
+            <div class="small text-muted">Бележката остава тук, докато не бъде променена или изтрита от базата/администратора.</div>
+        </div>
+    </div>
+}
+<a asp-action="Profile" class="btn btn-outline-secondary">Назад към профила</a>

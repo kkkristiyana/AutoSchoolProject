@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoSchoolProject.ViewModels.Student
@@ -23,16 +22,14 @@ namespace AutoSchoolProject.ViewModels.Student
         [Display(Name = "Телефон")]
         public string? PhoneNumber { get; set; }
 
-        [Required]
         [Display(Name = "Категория")]
-        public int? CourseId { get; set; }
-
-        public List<SelectListItem> Courses { get; set; } = new();
+        public string? CourseName { get; set; }
 
         public string? CurrentProfileImagePath { get; set; }
 
         [Display(Name = "Профилна снимка")]
         public IFormFile? ProfileImage { get; set; }
+
         public string? ProfileImagePath { get; set; }
     }
 }

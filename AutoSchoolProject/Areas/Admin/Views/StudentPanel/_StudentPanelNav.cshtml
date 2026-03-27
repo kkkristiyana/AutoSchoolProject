@@ -1,6 +1,12 @@
 ﻿@{
     int studentId = ViewBag.StudentId is int v ? v : 0;
     string studentName = ViewBag.StudentName as string ?? "—";
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+
+    string PanelBtnClass(string action, string baseClass)
+        => string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)
+            ? $"{baseClass} panel-link-active"
+            : baseClass;
 }
 
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 instructor-nav-shell">
@@ -10,15 +16,15 @@
     </div>
 
     <div class="btn-group" role="group">
-        <a class="btn btn-outline-primary"
+        <a class="@PanelBtnClass("Profile", "btn btn-outline-primary")"
            asp-area="Admin" asp-controller="StudentPanel" asp-action="Profile" asp-route-studentId="@studentId">Профил</a>
-        <a class="btn btn-outline-primary"
+        <a class="@PanelBtnClass("Schedule", "btn btn-outline-primary")"
            asp-area="Admin" asp-controller="StudentPanel" asp-action="Schedule" asp-route-studentId="@studentId">График</a>
-        <a class="btn btn-outline-primary"
+        <a class="@PanelBtnClass("MyLessons", "btn btn-outline-primary")"
            asp-area="Admin" asp-controller="StudentPanel" asp-action="MyLessons" asp-route-studentId="@studentId">Моите часове</a>
-        <a class="btn btn-outline-primary"
+        <a class="@PanelBtnClass("TestResults", "btn btn-outline-primary")"
            asp-area="Admin" asp-controller="StudentPanel" asp-action="TestResults" asp-route-studentId="@studentId">Тестове</a>
-        <a class="btn btn-outline-success"
+        <a class="@PanelBtnClass("Instructors", "btn btn-outline-success")"
            asp-area="Admin" asp-controller="StudentPanel" asp-action="Instructors" asp-route-studentId="@studentId">Запази час</a>
     </div>
 

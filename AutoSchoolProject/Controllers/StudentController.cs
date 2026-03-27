@@ -25,6 +25,12 @@ public class StudentController : Controller
         return View(model);
     }
 
+    public async Task<IActionResult> Messages()
+    {
+        var model = await _studentService.GetProfileAsync(User);
+        return View(model);
+    }
+
     [HttpGet]
     public async Task<IActionResult> EditProfile()
     {
@@ -39,7 +45,7 @@ public class StudentController : Controller
         if (!ModelState.IsValid)
         {
             var refreshed = await _studentService.GetEditProfileAsync(User);
-            model.Courses = refreshed.Courses;
+            model.CourseName = refreshed.CourseName;
             model.CurrentProfileImagePath = refreshed.CurrentProfileImagePath;
             return View(model);
         }
@@ -62,21 +68,37 @@ public class StudentController : Controller
 
     public async Task<IActionResult> Instructors()
     {
-        var model = await _studentService.GetInstructorsAsync();
+        var model = await _studentService.GetInstructorsAsync(User);
         return View(model);
     }
 
     public async Task<IActionResult> InstructorDetails(int id)
     {
-        var model = await _studentService.GetInstructorDetailsAsync(id);
-        return View(model);
+        try
+        {
+            var model = await _studentService.GetInstructorDetailsAsync(User, id);
+            return View(model);
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Instructors));
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> BookLesson(int instructorId)
     {
-        var model = await _studentService.GetBookLessonAsync(User, instructorId);
-        return View(model);
+        try
+        {
+            var model = await _studentService.GetBookLessonAsync(User, instructorId);
+            return View(model);
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Instructors));
+        }
     }
 
     [HttpPost]
@@ -138,7 +160,7 @@ public class StudentController : Controller
         try
         {
             await _studentService.CancelLessonAsync(User, id);
-            TempData["Success"] = "Часът е отменен.";
+            TempData["Success"] = "Часът е отменен и слотът отново е свободен.";
         }
         catch (InvalidOperationException ex)
         {

@@ -1,17 +1,18 @@
 ﻿@model AutoSchoolProject.ViewModels.Student.EditStudentProfileViewModel
 
 @{
-    ViewData["Title"] = "Редакция на профил (Admin Student Panel)";
+    ViewData["Title"] = "Редакция на профил";
     var hasImg = !string.IsNullOrWhiteSpace(Model.CurrentProfileImagePath);
-    int studentId = ViewBag.StudentId is int v ? v : 0;
 }
 
-<partial name="_StudentPanelNav" />
+<h2 class="mb-3">✏️ Редакция на профил</h2>
 
-<h3 class="mb-3">✏️ Редакция на профил</h3>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
-<form asp-area="Admin" asp-controller="StudentPanel" asp-action="EditProfile" asp-route-studentId="@studentId"
-      method="post" enctype="multipart/form-data" class="card shadow-sm p-3">
+<form asp-action="EditProfile" method="post" enctype="multipart/form-data" class="card shadow-sm p-3">
     @Html.AntiForgeryToken()
 
     <div class="mb-3">
@@ -55,15 +56,13 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="CourseId" class="form-label"></label>
-        <select asp-for="CourseId" asp-items="Model.Courses" class="form-select">
-            <option value="">-- Избери категория --</option>
-        </select>
-        <span asp-validation-for="CourseId" class="text-danger"></span>
+        <label asp-for="CourseName" class="form-label"></label>
+        <input asp-for="CourseName" class="form-control" readonly />
+        <div class="form-text">Категорията се променя само от администратор.</div>
     </div>
 
     <button type="submit" class="btn btn-primary">Запази</button>
-    <a asp-area="Admin" asp-controller="StudentPanel" asp-action="Profile" asp-route-studentId="@studentId" class="btn btn-outline-secondary ms-2">Назад</a>
+    <a asp-action="Profile" class="btn btn-outline-secondary ms-2">Назад</a>
 </form>
 
 @section Scripts {

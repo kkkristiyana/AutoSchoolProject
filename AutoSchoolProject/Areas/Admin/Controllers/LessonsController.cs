@@ -121,8 +121,15 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             var lesson = await _context.PracticeLessons.FindAsync(id);
             if (lesson == null) return NotFound();
 
+            if (!CanApprove(lesson))
+            {
+                TempData["Error"] = "Само чакащ час може да бъде приет.";
+                return RedirectToAction(nameof(Index));
+            }
+
             lesson.Status = LessonStatus.Approved;
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Часът е одобрен.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -133,8 +140,15 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             var lesson = await _context.PracticeLessons.FindAsync(id);
             if (lesson == null) return NotFound();
 
+            if (!CanReject(lesson))
+            {
+                TempData["Error"] = "Само чакащ час може да бъде отказан.";
+                return RedirectToAction(nameof(Index));
+            }
+
             lesson.Status = LessonStatus.Rejected;
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Часът е отказан.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -145,10 +159,36 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             var lesson = await _context.PracticeLessons.FindAsync(id);
             if (lesson == null) return NotFound();
 
+            if (!CanCancel(lesson))
+            {
+                TempData["Error"] = "Този час не може да бъде отменен.";
+                return RedirectToAction(nameof(Index));
+            }
+
             lesson.Status = LessonStatus.Cancelled;
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Часът е отменен.";
             return RedirectToAction(nameof(Index));
         }
+
+        private static bool CanApprove(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.StudentId.HasValue
+               && lesson.Status == LessonStatus.Pending
+               && lesson.DateTime > DateTime.Now;
+
+        private static bool CanReject(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.StudentId.HasValue
+               && lesson.Status == LessonStatus.Pending
+               && lesson.DateTime > DateTime.Now;
+
+        private static bool CanCancel(PracticeLesson lesson)
+            => !lesson.Completed
+               && lesson.DateTime > DateTime.Now
+               && (lesson.Status == LessonStatus.Available
+                   || lesson.Status == LessonStatus.Pending
+                   || lesson.Status == LessonStatus.Approved);
 
         private async Task<List<SelectListItem>> GetInstructorSelectListAsync()
         {

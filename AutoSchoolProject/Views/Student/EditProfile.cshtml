@@ -56,11 +56,9 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="CourseId" class="form-label"></label>
-        <select asp-for="CourseId" asp-items="Model.Courses" class="form-select">
-            <option value="">-- Избери категория --</option>
-        </select>
-        <span asp-validation-for="CourseId" class="text-danger"></span>
+        <label asp-for="CourseName" class="form-label"></label>
+        <input asp-for="CourseName" class="form-control" readonly />
+        <div class="form-text">Категорията се променя само от администратор.</div>
     </div>
 
     <button type="submit" class="btn btn-primary">Запази</button>

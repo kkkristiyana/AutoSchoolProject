@@ -111,6 +111,11 @@ a {
         color: var(--teal-dark);
         background: rgba(9, 179, 140, 0.08);
     }
+    .navbar .nav-link.nav-link-active {
+        color: var(--teal-dark);
+        background: rgba(9, 179, 140, 0.12);
+    }
+
 
 .nav-link-accent {
     color: var(--yellow-dark) !important;
@@ -182,6 +187,11 @@ a {
         color: var(--navy);
         border-color: rgba(18, 50, 71, 0.3);
     }
+.panel-link-active {
+    background: rgba(9, 179, 140, 0.12) !important;
+    border-color: var(--teal-dark) !important;
+    color: var(--teal-dark) !important;
+}
 
 .btn-nav-outline,
 .btn-nav-accent {
@@ -274,7 +284,31 @@ a {
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
+.placeholder-media--image {
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 
+    .placeholder-media--image::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(18, 50, 71, 0.10) 0%, rgba(18, 50, 71, 0.42) 100%);
+    }
+
+    .placeholder-media--image > span {
+        position: relative;
+        z-index: 1;
+        padding: 0.55rem 0.85rem;
+        border-radius: 0.9rem;
+        background: rgba(18, 50, 71, 0.72);
+        color: white;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+    }
 .home-hero {
     overflow: hidden;
     background: linear-gradient(110deg, var(--yellow) 0 42%, white 42% 43%, var(--navy) 43% 100%);

@@ -9,9 +9,14 @@
 
 <h3 class="mb-3">🧑‍🏫 Инструктори</h3>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 @if (!Model.Any())
 {
-    <div class="alert alert-info">Няма налични инструктори.</div>
+    <div class="alert alert-info">Няма налични инструктори за категорията на този курсист.</div>
 }
 else
 {

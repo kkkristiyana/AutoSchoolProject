@@ -19,6 +19,10 @@
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 <div class="d-flex gap-2 mb-3">
     <a class="btn btn-success" asp-area="Admin" asp-controller="Lessons" asp-action="CreateSlot">+ Свободен слот</a>
@@ -54,13 +58,16 @@
     <tbody>
         @foreach (var l in Model)
         {
+            var canApproveReject = !l.Completed && l.Status == "Pending" && l.DateTime > DateTime.Now && !string.IsNullOrWhiteSpace(l.StudentName);
+            var canCancel = !l.Completed && l.DateTime > DateTime.Now && (l.Status == "Available" || l.Status == "Pending" || l.Status == "Approved");
+
             <tr>
                 <td>@l.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
                 <td>@(string.IsNullOrWhiteSpace(l.StudentName) ? "—" : l.StudentName)</td>
                 <td>@(string.IsNullOrWhiteSpace(l.InstructorName) ? "—" : l.InstructorName)</td>
                 <td>@StatusBg(l.Status)</td>
                 <td class="text-end">
-                    @if (l.Status == "Pending")
+                    @if (canApproveReject)
                     {
                         <form asp-area="Admin" asp-controller="Lessons" asp-action="Approve" asp-route-id="@l.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
@@ -72,12 +79,17 @@
                         </form>
                     }
 
-                    @if (l.Status != "Rejected" && l.Status != "Cancelled")
+                    @if (canCancel)
                     {
                         <form asp-area="Admin" asp-controller="Lessons" asp-action="Cancel" asp-route-id="@l.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <button class="btn btn-sm btn-danger">Отмени</button>
                         </form>
+                    }
+
+                    @if (!canApproveReject && !canCancel)
+                    {
+                        <span class="text-muted">—</span>
                     }
                 </td>
             </tr>
@@ -85,4 +97,3 @@
     </tbody>
 </table>
 <a class="btn btn-outline-secondary" asp-controller="Dashboard" asp-action="Index">Назад към началната страница</a>
-
