@@ -1,7 +1,7 @@
 ﻿@model AutoSchoolProject.ViewModels.Admin.AdminEditInstructorViewModel
 
 @{
-    ViewData["Title"] = "Редакция на профил (Admin Instructor Panel)";
+    ViewData["Title"] = "Редакция на профил";
 }
 
 <partial name="_InstructorPanelNav" />
@@ -13,7 +13,11 @@
     <div class="row g-3">
         <div class="col-md-6">
             <label class="form-label">Профилна снимка</label>
-            <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*" />
+            <div class="file-picker d-flex align-items-center gap-3 flex-wrap">
+                <input asp-for="ProfileImage" type="file" id="adminInstructorProfileImage" class="d-none js-bulgarian-file-input" accept="image/*" />
+                <label for="adminInstructorProfileImage" class="btn btn-outline-secondary mb-0">Избери файл</label>
+                <span class="small text-muted js-file-name">Няма избран файл</span>
+            </div>
             @if (!string.IsNullOrWhiteSpace(Model.CurrentProfileImagePath))
             {
                 <img src="@Model.CurrentProfileImagePath" alt="Профилна" class="mt-2" style="width:72px;height:72px;object-fit:cover;border-radius:50%;" />
@@ -21,7 +25,11 @@
         </div>
         <div class="col-md-6">
             <label class="form-label">Снимка на колата</label>
-            <input asp-for="CarImage" type="file" class="form-control" accept="image/*" />
+            <div class="file-picker d-flex align-items-center gap-3 flex-wrap">
+                <input asp-for="CarImage" type="file" id="adminInstructorCarImage" class="d-none js-bulgarian-file-input" accept="image/*" />
+                <label for="adminInstructorCarImage" class="btn btn-outline-secondary mb-0">Избери файл</label>
+                <span class="small text-muted js-file-name">Няма избран файл</span>
+            </div>
             @if (!string.IsNullOrWhiteSpace(Model.CurrentCarImagePath))
             {
                 <img src="@Model.CurrentCarImagePath" alt="Кола" class="mt-2" style="width:140px;height:80px;object-fit:cover;border-radius:12px;" />

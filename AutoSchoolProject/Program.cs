@@ -14,17 +14,20 @@ namespace AutoSchoolProject
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
-
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
+                options.Password.RequiredLength = 6;
             })
+            .AddErrorDescriber<BulgarianIdentityErrorDescriber>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
@@ -33,12 +36,39 @@ namespace AutoSchoolProject
             builder.Services.AddScoped<StudentService>();
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<InstructorService>();
-            builder.Services.AddControllersWithViews();
+
+            builder.Services.AddControllersWithViews(options =>
+            {
+                var provider = options.ModelBindingMessageProvider;
+
+                provider.SetAttemptedValueIsInvalidAccessor((value, fieldName) =>
+                    $"Стойността '{value}' не е валидна за полето {fieldName}.");
+                provider.SetMissingBindRequiredValueAccessor(fieldName =>
+                    $"Полето {fieldName} е задължително.");
+                provider.SetMissingKeyOrValueAccessor(() =>
+                    "Липсва ключ или стойност.");
+                provider.SetMissingRequestBodyRequiredValueAccessor(() =>
+                    "Липсват изпратени данни.");
+                provider.SetNonPropertyAttemptedValueIsInvalidAccessor(value =>
+                    $"Стойността '{value}' не е валидна.");
+                provider.SetNonPropertyUnknownValueIsInvalidAccessor(() =>
+                    "Подадената стойност не е валидна.");
+                provider.SetNonPropertyValueMustBeANumberAccessor(() =>
+                    "Стойността трябва да е число.");
+                provider.SetUnknownValueIsInvalidAccessor(fieldName =>
+                    $"Подадената стойност не е валидна за {fieldName}.");
+                provider.SetValueIsInvalidAccessor(value =>
+                    $"Стойността '{value}' не е валидна.");
+                provider.SetValueMustBeANumberAccessor(fieldName =>
+                    $"Полето {fieldName} трябва да е число.");
+                provider.SetValueMustNotBeNullAccessor(fieldName =>
+                    $"Полето {fieldName} е задължително.");
+            });
+
             builder.Services.AddRazorPages();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
@@ -46,25 +76,23 @@ namespace AutoSchoolProject
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
-            name: "areas",
-            pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+                name: "areas",
+                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=IndexForViewerOnly}/{id?}");
+
             app.MapRazorPages();
 
             using (var scope = app.Services.CreateScope())

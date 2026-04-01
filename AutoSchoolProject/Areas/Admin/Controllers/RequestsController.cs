@@ -314,8 +314,9 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
         private static List<SelectListItem> GetAvailableRoleOptions() => new()
         {
-            new SelectListItem { Value = "Student", Text = "Student" },
-            new SelectListItem { Value = "Instructor", Text = "Instructor" }
+            new SelectListItem { Value = "Student", Text = "Курсист" },
+            new SelectListItem { Value = "Instructor", Text = "Инструктор" }
         };
+
     }
 }

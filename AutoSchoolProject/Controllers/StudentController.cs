@@ -1,8 +1,13 @@
 ﻿using AutoSchoolProject.Data;
+using AutoSchoolProject.Models;
+using AutoSchoolProject.Models.Enums;
+using AutoSchoolProject.Services;
 using AutoSchoolProject.Services.Interfaces;
+using AutoSchoolProject.ViewModels.Common;
 using AutoSchoolProject.ViewModels.Student;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 [Authorize(Roles = "Student")]
@@ -27,7 +32,65 @@ public class StudentController : Controller
 
     public async Task<IActionResult> Messages()
     {
-        var model = await _studentService.GetProfileAsync(User);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return RedirectToAction(nameof(Profile));
+        }
+
+        var student = await _context.Students
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (student == null)
+        {
+            TempData["Error"] = "Не е намерен курсист с този профил.";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        var adminMessages = await _context.EnrollmentRequests
+            .Where(r => r.CreatedStudentUserId == userId
+                        && r.Status != RequestStatus.New
+                        && r.AdminNote != null
+                        && r.AdminNote != "")
+            .OrderByDescending(r => r.ProcessedAt ?? r.CreatedAt)
+            .Select(r => new UserMessageItemViewModel
+            {
+                Title = r.Status == RequestStatus.Approved ? "Съобщение от администратора" : "Отговор на заявката за записване",
+                Body = r.AdminNote!,
+                CreatedAt = r.ProcessedAt ?? r.CreatedAt,
+                Category = "Администрация"
+            })
+            .ToListAsync();
+
+        var lessonRows = await _context.PracticeLessons
+            .Include(l => l.Instructor)
+                .ThenInclude(i => i.User)
+            .Where(l => l.StudentId == student.Id && l.Note != null && l.Note != "")
+            .OrderByDescending(l => l.DateTime)
+            .ToListAsync();
+
+        var lessonMessages = lessonRows
+            .Where(l => LessonMessageFactory.IsStudentMessage(l.Note))
+            .Select(l => new UserMessageItemViewModel
+            {
+                Title = $"Известие за час • {l.DateTime:dd.MM.yyyy HH:mm}",
+                Body = LessonMessageFactory.StripPrefix(l.Note),
+                CreatedAt = l.DateTime,
+                Category = "Практика"
+            })
+            .ToList();
+
+        var model = new UserMessagesViewModel
+        {
+            Heading = "Съобщения",
+            EmptyMessage = "Все още нямаш съобщения.",
+            Messages = adminMessages
+                .Concat(lessonMessages)
+                .OrderByDescending(m => m.CreatedAt)
+                .ToList()
+        };
+
         return View(model);
     }
 

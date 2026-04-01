@@ -285,14 +285,11 @@ namespace AutoSchoolProject.Services
             slot.CourseId = student.CourseId;
             slot.Status = LessonStatus.Pending;
             slot.Completed = false;
-
-            if (string.IsNullOrWhiteSpace(slot.Note) || string.Equals(slot.Note, "Свободен слот", StringComparison.OrdinalIgnoreCase))
-            {
-                slot.Note = "Запазен час";
-            }
+            slot.Note = "Запазен час";
 
             await _context.SaveChangesAsync();
         }
+
 
         public async Task<List<PracticeLesson>> GetInstructorLessonsAsync(int instructorId, DateTime start, DateTime end)
         {
@@ -323,7 +320,7 @@ namespace AutoSchoolProject.Services
                 CourseName = l.Course != null ? l.Course.Name : null,
                 Status = GetLessonStatusText(l.Status, l.Completed),
                 Completed = l.Completed,
-                Note = l.Note
+                Note = LessonMessageFactory.StripPrefix(l.Note)
             }).ToList();
         }
 
@@ -333,6 +330,7 @@ namespace AutoSchoolProject.Services
 
             var lesson = await _context.PracticeLessons
                 .Include(l => l.Instructor)
+                    .ThenInclude(i => i.User)
                 .FirstOrDefaultAsync(l => l.Id == lessonId && l.StudentId == student.Id);
 
             if (lesson == null)
@@ -350,18 +348,18 @@ namespace AutoSchoolProject.Services
                 throw new InvalidOperationException("Този час не може да бъде отменен.");
             }
 
+            var studentName = $"{student.User.FirstName} {student.User.LastName}".Trim();
+            var lessonDateText = lesson.DateTime.ToString("dd.MM.yyyy HH:mm");
+
             lesson.StudentId = null;
             lesson.Completed = false;
             lesson.Status = LessonStatus.Available;
             lesson.CourseId = lesson.Instructor?.CourseId ?? lesson.CourseId;
-
-            if (string.IsNullOrWhiteSpace(lesson.Note) || string.Equals(lesson.Note, "Запазен час", StringComparison.OrdinalIgnoreCase))
-            {
-                lesson.Note = "Свободен слот";
-            }
+            lesson.Note = LessonMessageFactory.ForInstructor($"Курсистът {studentName} отмени часа за {lessonDateText}. Слотът отново е свободен.");
 
             await _context.SaveChangesAsync();
         }
+
 
         public async Task<StudentTestResultsViewModel> GetTestResultsAsync(ClaimsPrincipal user)
         {

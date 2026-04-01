@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Часове";
     int instructorId = ViewBag.InstructorId is int v ? v : 0;
+
     string StatusBg(string? status) => status switch
     {
         "Available" => "Свободен слот",
@@ -11,6 +12,19 @@
         "Cancelled" => "Отменен",
         _ => status ?? "—"
     };
+
+    string CleanNote(string? note)
+    {
+        if (string.IsNullOrWhiteSpace(note))
+        {
+            return "—";
+        }
+
+        return note
+            .Replace("[КУРСИСТ]", string.Empty)
+            .Replace("[ИНСТРУКТОР]", string.Empty)
+            .Trim();
+    }
 }
 
 <partial name="_InstructorPanelNav" />
@@ -63,19 +77,19 @@ else
         <tbody>
             @foreach (var lesson in Model.Lessons)
             {
-                var canApproveReject = !lesson.Completed && lesson.Status == "Pending" && lesson.DateTime > DateTime.Now;
-                var canReschedule = !lesson.Completed && lesson.DateTime > DateTime.Now && (lesson.Status == "Available" || lesson.Status == "Pending" || lesson.Status == "Approved");
+                var isPending = !lesson.Completed && lesson.Status == "Pending" && lesson.DateTime > DateTime.Now;
+                var isApprovedFuture = !lesson.Completed && lesson.Status == "Approved" && lesson.DateTime > DateTime.Now;
+                var isAvailableFuture = !lesson.Completed && lesson.Status == "Available" && lesson.DateTime > DateTime.Now;
                 var canComplete = !lesson.Completed && lesson.Status == "Approved" && !string.IsNullOrWhiteSpace(lesson.StudentName) && lesson.DateTime <= DateTime.Now;
-                var canCancel = !lesson.Completed && lesson.DateTime > DateTime.Now && (lesson.Status == "Available" || lesson.Status == "Pending" || lesson.Status == "Approved");
 
                 <tr>
                     <td>@lesson.DateTime.ToString("dd.MM.yyyy HH:mm")</td>
                     <td>@(string.IsNullOrWhiteSpace(lesson.StudentName) ? "—" : lesson.StudentName)</td>
                     <td>@lesson.CourseName</td>
                     <td>@StatusBg(lesson.Status) @(lesson.Completed ? "• Проведен" : string.Empty)</td>
-                    <td>@lesson.Note</td>
+                    <td>@CleanNote(lesson.Note)</td>
                     <td class="text-end">
-                        @if (canApproveReject)
+                        @if (isPending)
                         {
                             <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="ApproveLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
@@ -85,29 +99,33 @@ else
                                 @Html.AntiForgeryToken()
                                 <button class="btn btn-sm btn-warning">Откажи</button>
                             </form>
-                        }
-
-                        @if (canReschedule)
-                        {
                             <a class="btn btn-sm btn-outline-primary"
                                asp-area="Admin" asp-controller="InstructorPanel" asp-action="RescheduleLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id">Пренасрочи</a>
                         }
-
-                        @if (canComplete)
+                        else if (isApprovedFuture)
                         {
-                            <a class="btn btn-sm btn-outline-success"
-                               asp-area="Admin" asp-controller="InstructorPanel" asp-action="CompleteLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id">Проведен</a>
-                        }
-
-                        @if (canCancel)
-                        {
+                            <a class="btn btn-sm btn-outline-primary"
+                               asp-area="Admin" asp-controller="InstructorPanel" asp-action="RescheduleLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id">Пренасрочи</a>
                             <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="CancelLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <button class="btn btn-sm btn-outline-danger">Отмени</button>
                             </form>
                         }
-
-                        @if (!canApproveReject && !canReschedule && !canComplete && !canCancel)
+                        else if (isAvailableFuture)
+                        {
+                            <a class="btn btn-sm btn-outline-primary"
+                               asp-area="Admin" asp-controller="InstructorPanel" asp-action="RescheduleLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id">Пренасрочи</a>
+                            <form asp-area="Admin" asp-controller="InstructorPanel" asp-action="CancelLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-sm btn-outline-danger">Отмени</button>
+                            </form>
+                        }
+                        else if (canComplete)
+                        {
+                            <a class="btn btn-sm btn-outline-success"
+                               asp-area="Admin" asp-controller="InstructorPanel" asp-action="CompleteLesson" asp-route-instructorId="@instructorId" asp-route-id="@lesson.Id">Проведен</a>
+                        }
+                        else
                         {
                             <span class="text-muted">—</span>
                         }

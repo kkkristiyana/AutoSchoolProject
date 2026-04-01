@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Заявка за записване";
+    var minDate = DateTime.Today.ToString("yyyy-MM-dd");
 }
 
 <h2 class="mb-3">📝 Заявка за записване</h2>
@@ -42,12 +43,18 @@
 
             <div class="mb-3">
                 <label asp-for="PreferredStartDate" class="form-label">Предпочитан старт</label>
-                <input asp-for="PreferredStartDate" type="date" class="form-control" />
+                <input asp-for="PreferredStartDate" type="date" class="form-control" min="@minDate" />
                 <span asp-validation-for="PreferredStartDate" class="text-danger"></span>
+                <div class="form-text">Можеш да избираш само днешна или бъдеща дата.</div>
             </div>
 
             <button type="submit" class="btn btn-success">Изпрати</button>
             <a class="btn btn-outline-secondary" asp-action="Index">Назад</a>
+
+            <div class="form-text mt-3">
+                След като администраторът одобри заявката ти, е добре да излезеш и да влезеш отново,
+                за да се зареди новата ти роля в системата.
+            </div>
         </form>
     </div>
 </div>

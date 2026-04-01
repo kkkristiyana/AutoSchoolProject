@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AutoSchoolProject.Services;
+using AutoSchoolProject.ViewModels.Common;
 
 namespace AutoSchoolProject.Controllers
 {
@@ -257,7 +259,8 @@ namespace AutoSchoolProject.Controllers
             SetInstructorContext(instructor);
 
             var lesson = await _context.PracticeLessons
-                .Include(l => l.Student).ThenInclude(s => s.User)
+                .Include(l => l.Student)
+                    .ThenInclude(s => s.User)
                 .FirstOrDefaultAsync(l => l.Id == model.LessonId && l.InstructorId == instructor.Id);
 
             if (lesson == null)
@@ -276,6 +279,7 @@ namespace AutoSchoolProject.Controllers
                 return View(model);
             }
 
+            var oldDateTime = lesson.DateTime;
             var start = model.NewDateTime;
             var end = model.NewDateTime.AddMinutes(model.DurationMinutes);
 
@@ -296,17 +300,25 @@ namespace AutoSchoolProject.Controllers
             lesson.DateTime = model.NewDateTime;
             lesson.DurationMinutes = model.DurationMinutes;
 
+            if (lesson.StudentId.HasValue)
+            {
+                lesson.Note = LessonMessageFactory.ForStudent(
+                    $"Инструкторът пренасрочи часа ти от {oldDateTime:dd.MM.yyyy HH:mm} за {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+            }
+
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът беше пренасрочен.";
             return RedirectToAction(nameof(Schedule));
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(int id)
         {
             var instructor = await GetCurrentInstructorAsync();
-            var lesson = await _context.PracticeLessons.FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructor.Id);
+            var lesson = await _context.PracticeLessons
+                .FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructor.Id);
 
             if (lesson == null)
             {
@@ -320,17 +332,22 @@ namespace AutoSchoolProject.Controllers
             }
 
             lesson.Status = LessonStatus.Approved;
+            lesson.Note = LessonMessageFactory.ForStudent(
+                $"Инструкторът прие часа ти за {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+
             await _context.SaveChangesAsync();
             TempData["Success"] = "Заявката за час беше приета.";
             return RedirectToAction(nameof(PendingLessons));
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int id)
         {
             var instructor = await GetCurrentInstructorAsync();
-            var lesson = await _context.PracticeLessons.FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructor.Id);
+            var lesson = await _context.PracticeLessons
+                .FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructor.Id);
 
             if (lesson == null)
             {
@@ -344,17 +361,22 @@ namespace AutoSchoolProject.Controllers
             }
 
             lesson.Status = LessonStatus.Rejected;
+            lesson.Note = LessonMessageFactory.ForStudent(
+                $"Инструкторът отказа заявката ти за часа на {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+
             await _context.SaveChangesAsync();
             TempData["Success"] = "Заявката за час беше отказана.";
             return RedirectToAction(nameof(PendingLessons));
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id)
         {
             var instructor = await GetCurrentInstructorAsync();
-            var lesson = await _context.PracticeLessons.FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructor.Id);
+            var lesson = await _context.PracticeLessons
+                .FirstOrDefaultAsync(l => l.Id == id && l.InstructorId == instructor.Id);
 
             if (lesson == null)
             {
@@ -368,10 +390,18 @@ namespace AutoSchoolProject.Controllers
             }
 
             lesson.Status = LessonStatus.Cancelled;
+
+            if (lesson.StudentId.HasValue)
+            {
+                lesson.Note = LessonMessageFactory.ForStudent(
+                    $"Инструкторът отмени часа ти за {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+            }
+
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът беше отменен.";
             return RedirectToAction(nameof(Schedule));
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Complete(int id)
@@ -500,11 +530,11 @@ namespace AutoSchoolProject.Controllers
                && lesson.DateTime > DateTime.Now;
 
         private static bool CanCancel(PracticeLesson lesson)
-            => !lesson.Completed
-               && lesson.DateTime > DateTime.Now
-               && (lesson.Status == LessonStatus.Available
-                   || lesson.Status == LessonStatus.Pending
-                   || lesson.Status == LessonStatus.Approved);
+    => !lesson.Completed
+       && lesson.DateTime > DateTime.Now
+       && (lesson.Status == LessonStatus.Available
+           || lesson.Status == LessonStatus.Approved);
+
 
         private static bool CanReschedule(PracticeLesson lesson)
             => !lesson.Completed
@@ -551,9 +581,60 @@ namespace AutoSchoolProject.Controllers
                 Status = lesson.Completed ? "Проведен" : statusText,
                 StatusCssClass = lesson.Completed ? "status-completed" : cssClass,
                 Completed = lesson.Completed,
-                Note = lesson.Note
+                Note = LessonMessageFactory.StripPrefix(lesson.Note)
             };
         }
+        public async Task<IActionResult> Messages()
+        {
+            var instructor = await GetCurrentInstructorAsync();
+            SetInstructorContext(instructor);
+
+            var pendingLessons = await _context.PracticeLessons
+                .Include(l => l.Student)
+                    .ThenInclude(s => s.User)
+                .Where(l => l.InstructorId == instructor.Id
+                            && l.Status == LessonStatus.Pending
+                            && l.StudentId != null)
+                .OrderByDescending(l => l.DateTime)
+                .ToListAsync();
+
+            var notificationLessons = await _context.PracticeLessons
+                .Where(l => l.InstructorId == instructor.Id && l.Note != null && l.Note != "")
+                .OrderByDescending(l => l.DateTime)
+                .ToListAsync();
+
+            var messages = new List<UserMessageItemViewModel>();
+
+            messages.AddRange(pendingLessons.Select(l => new UserMessageItemViewModel
+            {
+                Title = $"Нова заявка за час • {l.DateTime:dd.MM.yyyy HH:mm}",
+                Body = l.Student != null
+                    ? $"Курсистът {GetStudentName(l.Student)} изпрати заявка за час и чака твоето одобрение."
+                    : "Има нова заявка за час.",
+                CreatedAt = l.DateTime,
+                Category = "Практика"
+            }));
+
+            messages.AddRange(notificationLessons
+                .Where(l => LessonMessageFactory.IsInstructorMessage(l.Note))
+                .Select(l => new UserMessageItemViewModel
+                {
+                    Title = $"Известие за час • {l.DateTime:dd.MM.yyyy HH:mm}",
+                    Body = LessonMessageFactory.StripPrefix(l.Note),
+                    CreatedAt = l.DateTime,
+                    Category = "Практика"
+                }));
+
+            var model = new UserMessagesViewModel
+            {
+                Heading = "Съобщения",
+                EmptyMessage = "Все още нямаш съобщения.",
+                Messages = messages.OrderByDescending(m => m.CreatedAt).ToList()
+            };
+
+            return View(model);
+        }
+
 
         private static string GetInstructorName(Instructor instructor)
             => $"{instructor.User.FirstName} {instructor.User.LastName}".Trim();

@@ -17,7 +17,7 @@
             <th>Имейл</th>
             <th>Телефон</th>
             <th>Категория</th>
-            <th>Approved (предстоящи)</th>
+            <th>Одобрени (предстоящи)</th>
             <th class="text-end">Действия</th>
         </tr>
     </thead>
@@ -42,7 +42,7 @@
                     <a class="btn btn-sm btn-outline-primary"
                        asp-area="Admin" asp-controller="Instructors" asp-action="Edit" asp-route-id="@i.Id">Редакция</a>
                     <a class="btn btn-sm btn-primary"
-                       asp-area="Admin" asp-controller="InstructorPanel" asp-action="Profile" asp-route-instructorId="@i.Id">Instructor Panel</a>
+                       asp-area="Admin" asp-controller="InstructorPanel" asp-action="Profile" asp-route-instructorId="@i.Id">Панел на инструктора</a>
                 </td>
             </tr>
         }
@@ -50,5 +50,5 @@
 </table>
 <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
    class="btn btn-sm btn-outline-secondary mb-3">
-    ← Назад към Dashboard
+    ← Назад към админ таблото
 </a>

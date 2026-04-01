@@ -38,7 +38,7 @@
 
         @if (!string.IsNullOrWhiteSpace(Model.AdminNote))
         {
-            <p class="mb-0"><strong>Бележка (Admin):</strong> @Model.AdminNote</p>
+            <p class="mb-0"><strong>Бележка (Админ):</strong> @Model.AdminNote</p>
         }
     </div>
 </div>
@@ -48,7 +48,7 @@
 
     @if (Model.Status == RequestStatus.New)
     {
-        <a class="btn btn-success" asp-action="Approve" asp-route-id="@Model.Id">Approve</a>
-        <a class="btn btn-danger" asp-action="Reject" asp-route-id="@Model.Id">Reject</a>
+        <a class="btn btn-success" asp-action="Approve" asp-route-id="@Model.Id">Одобри</a>
+        <a class="btn btn-danger" asp-action="Reject" asp-route-id="@Model.Id">Откажи</a>
     }
 </div>

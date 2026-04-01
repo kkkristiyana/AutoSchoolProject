@@ -102,6 +102,9 @@
                                 <a class="@NavClass("", "Instructor", "EditProfile")" asp-controller="Instructor" asp-action="EditProfile">Редакция на профил</a>
                             </li>
                             <li class="nav-item">
+                                <a class="@NavClass("", "Instructor", "Messages")" asp-controller="Instructor" asp-action="Messages">Съобщения</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="@NavClass("", "Instructor", "Create")" asp-controller="Instructor" asp-action="Create">Създай свободен слот</a>
                             </li>
                             <li class="nav-item">
@@ -114,6 +117,7 @@
                                 <a class="@NavClass("", "Instructor", "MyStudents")" asp-controller="Instructor" asp-action="MyStudents">Курсисти</a>
                             </li>
                         }
+
                         else if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">

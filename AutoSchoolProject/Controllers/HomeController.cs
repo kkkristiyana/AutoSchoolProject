@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using AutoSchoolProject.Data;
 using AutoSchoolProject.Models;
 using AutoSchoolProject.Models.Enums;
@@ -7,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using System.Diagnostics;
 
 namespace AutoSchoolProject.Controllers
 {
@@ -58,7 +57,7 @@ namespace AutoSchoolProject.Controllers
         [HttpGet]
         public async Task<IActionResult> Apply()
         {
-            if (!User.Identity?.IsAuthenticated ?? true)
+            if (User.Identity?.IsAuthenticated != true)
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity", returnUrl = Url.Action(nameof(Apply), "Home") });
             }
@@ -89,7 +88,7 @@ namespace AutoSchoolProject.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Apply(EnrollmentRequestCreateViewModel model)
         {
-            if (!User.Identity?.IsAuthenticated ?? true)
+            if (User.Identity?.IsAuthenticated != true)
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity", returnUrl = Url.Action(nameof(Apply), "Home") });
             }
@@ -102,6 +101,11 @@ namespace AutoSchoolProject.Controllers
 
             model.Email = currentUser.Email ?? currentUser.UserName ?? string.Empty;
             model.IsEmailReadOnly = true;
+
+            if (model.PreferredStartDate.Date < DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(model.PreferredStartDate), "Предпочитаната начална дата не може да е в миналото.");
+            }
 
             if (!ModelState.IsValid)
             {
@@ -152,7 +156,7 @@ namespace AutoSchoolProject.Controllers
                 .Select(c => new SelectListItem
                 {
                     Value = c.Id.ToString(),
-                    Text = $"{c.Name} - {c.Price:F2} лв"
+                    Text = $"{c.Name} - {c.Price:F2} лв."
                 })
                 .ToListAsync();
         }

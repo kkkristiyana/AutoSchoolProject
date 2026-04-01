@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using AutoSchoolProject.Services;
 
 namespace AutoSchoolProject.Areas.Admin.Controllers
 {
@@ -318,8 +319,10 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            var oldDateTime = lesson.DateTime;
             var start = model.NewDateTime;
             var end = model.NewDateTime.AddMinutes(model.DurationMinutes);
+
             var overlaps = await _context.PracticeLessons.AnyAsync(l =>
                 l.InstructorId == instructorId &&
                 l.Id != lesson.Id &&
@@ -336,11 +339,19 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             lesson.DateTime = model.NewDateTime;
             lesson.DurationMinutes = model.DurationMinutes;
+
+            if (lesson.StudentId.HasValue)
+            {
+                lesson.Note = LessonMessageFactory.ForStudent(
+                    $"Инструкторът пренасрочи часа ти от {oldDateTime:dd.MM.yyyy HH:mm} за {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+            }
+
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Часът е пренасрочен.";
             return RedirectToAction(nameof(Lessons), new { instructorId });
         }
+
 
         [HttpGet]
         public async Task<IActionResult> CompleteLesson(int instructorId, int id)
@@ -410,10 +421,14 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             }
 
             lesson.Status = LessonStatus.Approved;
+            lesson.Note = LessonMessageFactory.ForStudent(
+                $"Инструкторът прие часа ти за {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът е одобрен.";
             return RedirectToAction(nameof(Lessons), new { instructorId });
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -429,10 +444,14 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             }
 
             lesson.Status = LessonStatus.Rejected;
+            lesson.Note = LessonMessageFactory.ForStudent(
+                $"Инструкторът отказа заявката ти за часа на {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът е отказан.";
             return RedirectToAction(nameof(Lessons), new { instructorId });
         }
+
 
 
         [HttpPost]
@@ -449,10 +468,18 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             }
 
             lesson.Status = LessonStatus.Cancelled;
+
+            if (lesson.StudentId.HasValue)
+            {
+                lesson.Note = LessonMessageFactory.ForStudent(
+                    $"Инструкторът отмени часа ти за {lesson.DateTime:dd.MM.yyyy HH:mm}.");
+            }
+
             await _context.SaveChangesAsync();
             TempData["Success"] = "Часът е отменен.";
             return RedirectToAction(nameof(Lessons), new { instructorId });
         }
+
 
 
         public async Task<IActionResult> Students(int instructorId)
@@ -542,11 +569,11 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                && lesson.DateTime > DateTime.Now;
 
         private static bool CanCancelLesson(PracticeLesson lesson)
-            => !lesson.Completed
-               && lesson.DateTime > DateTime.Now
-               && (lesson.Status == LessonStatus.Available
-                   || lesson.Status == LessonStatus.Pending
-                   || lesson.Status == LessonStatus.Approved);
+    => !lesson.Completed
+       && lesson.DateTime > DateTime.Now
+       && (lesson.Status == LessonStatus.Available
+           || lesson.Status == LessonStatus.Approved);
+
 
         private static bool CanRescheduleLesson(PracticeLesson lesson)
             => !lesson.Completed

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AutoSchoolProject.ViewModels.Public
 {
-    public class EnrollmentRequestCreateViewModel
+    public class EnrollmentRequestCreateViewModel : IValidatableObject
     {
         [Required(ErrorMessage = "Въведи име и фамилия.")]
         [StringLength(80, MinimumLength = 3, ErrorMessage = "Името трябва да е между 3 и 80 символа.")]
@@ -27,6 +27,15 @@ namespace AutoSchoolProject.ViewModels.Public
         public DateTime PreferredStartDate { get; set; } = DateTime.Today.AddDays(7);
 
         public List<SelectListItem> Courses { get; set; } = new();
-    }
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (PreferredStartDate.Date < DateTime.Today)
+            {
+                yield return new ValidationResult(
+                    "Предпочитаната начална дата не може да е в миналото.",
+                    new[] { nameof(PreferredStartDate) });
+            }
+        }
+    }
 }
