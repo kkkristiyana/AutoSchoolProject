@@ -3,16 +3,28 @@
 @{
     ViewData["Title"] = "Редакция на профил";
     var hasImg = !string.IsNullOrWhiteSpace(Model.CurrentProfileImagePath);
+    var studentId = ViewBag.StudentId is int v ? v : 0;
 }
 
 <h2 class="mb-3">✏️ Редакция на профил</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
 
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
-<form asp-action="EditProfile" method="post" enctype="multipart/form-data" class="card shadow-sm p-3">
+<form asp-area="Admin"
+      asp-controller="StudentPanel"
+      asp-action="EditProfile"
+      asp-route-studentId="@studentId"
+      method="post"
+      enctype="multipart/form-data"
+      class="card shadow-sm p-3">
     @Html.AntiForgeryToken()
 
     <div class="mb-3">
@@ -26,9 +38,24 @@
             {
                 <div style="width:72px;height:72px;border-radius:50%;background:#e9ecef;"></div>
             }
+
             <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*" />
         </div>
+
         <span asp-validation-for="ProfileImage" class="text-danger"></span>
+
+        @if (hasImg)
+        {
+            <div class="mt-2">
+                <button type="submit"
+                        formmethod="post"
+                        formnovalidate
+                        formaction="@Url.Action("ResetProfileImage", "StudentPanel", new { area = "Admin", studentId })"
+                        class="btn btn-outline-danger btn-sm">
+                    Нулирай профилната снимка
+                </button>
+            </div>
+        }
     </div>
 
     <div class="mb-3">
@@ -62,7 +89,13 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Запази</button>
-    <a asp-action="Profile" class="btn btn-outline-secondary ms-2">Назад</a>
+    <a asp-area="Admin"
+       asp-controller="StudentPanel"
+       asp-action="Profile"
+       asp-route-studentId="@studentId"
+       class="btn btn-outline-secondary ms-2">
+        Назад
+    </a>
 </form>
 
 @section Scripts {

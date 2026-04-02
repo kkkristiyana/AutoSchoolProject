@@ -49,14 +49,23 @@ namespace AutoSchoolProject.Services
             return "/" + folder.Replace("\\", "/") + "/" + fileName;
         }
 
+        public Task DeleteImageAsync(string? relativePath)
+        {
+            TryDeleteOld(relativePath);
+            return Task.CompletedTask;
+        }
+
         private void TryDeleteOld(string? oldRelativePath)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(oldRelativePath)) return;
+
                 var rel = oldRelativePath.TrimStart('/');
                 var full = Path.Combine(_env.WebRootPath, rel);
-                if (File.Exists(full)) File.Delete(full);
+
+                if (File.Exists(full))
+                    File.Delete(full);
             }
             catch
             {

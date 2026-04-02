@@ -9,6 +9,7 @@
         public int ApprovedUpcomingLessons { get; set; }
         public int CompletedLessons { get; set; }
 
+
         public List<LessonRowViewModel> LatestLessons { get; set; } = new();
     }
 

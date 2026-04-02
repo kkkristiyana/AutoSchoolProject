@@ -132,6 +132,32 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             TempData["Success"] = "Профилът е обновен (Admin Student Panel).";
             return RedirectToAction(nameof(Profile), new { studentId = id });
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetProfileImage(int studentId)
+        {
+            var student = await _context.Students
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Id == studentId);
+
+            if (student == null)
+                return NotFound();
+
+            if (!string.IsNullOrWhiteSpace(student.User.ProfileImagePath))
+            {
+                await _fileStorage.DeleteImageAsync(student.User.ProfileImagePath);
+                student.User.ProfileImagePath = null;
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Профилната снимка беше нулирана (Admin Student Panel).";
+            }
+            else
+            {
+                TempData["Error"] = "Няма зададена профилна снимка за нулиране.";
+            }
+
+            return RedirectToAction(nameof(EditProfile), new { studentId });
+        }
+
 
         public async Task<IActionResult> Instructors(int studentId)
         {

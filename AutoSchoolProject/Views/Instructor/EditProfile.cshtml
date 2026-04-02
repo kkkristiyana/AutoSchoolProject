@@ -3,6 +3,16 @@
     ViewData["Title"] = "Редакция на профил";
 }
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 <form asp-action="EditProfile" method="post" enctype="multipart/form-data" class="card shadow-sm p-4">
     @Html.AntiForgeryToken()
 
@@ -30,7 +40,6 @@
         <div class="col-md-6">
             <label class="form-label">Категория</label>
             <input value="@Model.CourseName" class="form-control" readonly />
-            <div class="form-text">Категорията се променя само от администратор.</div>
         </div>
         <div class="col-md-6">
             <label asp-for="CarModel" class="form-label"></label>
@@ -39,25 +48,29 @@
         </div>
         <div class="col-md-6">
             <label asp-for="ProfileImage" class="form-label"></label>
-            <div class="file-picker d-flex align-items-center gap-3 flex-wrap">
-                <input asp-for="ProfileImage" type="file" id="instructorProfileImage" class="d-none js-bulgarian-file-input" accept="image/*" />
-                <label for="instructorProfileImage" class="btn btn-outline-secondary mb-0">Избери файл</label>
-                <span class="small text-muted js-file-name">Няма избран файл</span>
-            </div>
+            <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*" />
             <span asp-validation-for="ProfileImage" class="text-danger"></span>
+
             @if (!string.IsNullOrWhiteSpace(Model.CurrentProfileImagePath))
             {
                 <img src="@Model.CurrentProfileImagePath" alt="Профилна снимка" class="mt-3" style="width:84px;height:84px;border-radius:50%;object-fit:cover;" />
+
+                <div class="mt-2">
+                    <button type="submit"
+                            formmethod="post"
+                            formnovalidate
+                            formaction="@Url.Action("ResetProfileImage", "Instructor")"
+                            class="btn btn-outline-danger btn-sm">
+                        Нулирай профилната снимка
+                    </button>
+                </div>
             }
         </div>
         <div class="col-md-6">
             <label asp-for="CarImage" class="form-label"></label>
-            <div class="file-picker d-flex align-items-center gap-3 flex-wrap">
-                <input asp-for="CarImage" type="file" id="instructorCarImage" class="d-none js-bulgarian-file-input" accept="image/*" />
-                <label for="instructorCarImage" class="btn btn-outline-secondary mb-0">Избери файл</label>
-                <span class="small text-muted js-file-name">Няма избран файл</span>
-            </div>
+            <input asp-for="CarImage" type="file" class="form-control" accept="image/*" />
             <span asp-validation-for="CarImage" class="text-danger"></span>
+
             @if (!string.IsNullOrWhiteSpace(Model.CurrentCarImagePath))
             {
                 <img src="@Model.CurrentCarImagePath" alt="Снимка на колата" class="mt-3" style="max-width:180px;border-radius:16px;object-fit:cover;" />

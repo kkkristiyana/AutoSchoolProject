@@ -57,92 +57,88 @@
                         @if (User.Identity?.IsAuthenticated != true)
                         {
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "IndexForViewerOnly")" asp-controller="Home" asp-action="IndexForViewerOnly">Начало</a>
+                                <a class="@NavClass("", "Home", "IndexForViewerOnly")" asp-area="" asp-controller="Home" asp-action="IndexForViewerOnly">Начало</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "CoursesInfoOnly")" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове</a>
+                                <a class="@NavClass("", "Home", "CoursesInfoOnly")" asp-area="" asp-controller="Home" asp-action="CoursesInfoOnly">Курсове</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "ConditionsViewerOnly")" asp-controller="Home" asp-action="ConditionsViewerOnly">Условия</a>
+                                <a class="@NavClass("", "Home", "ConditionsViewerOnly")" asp-area="" asp-controller="Home" asp-action="ConditionsViewerOnly">Условия</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "ContactsViewerOnly")" asp-controller="Home" asp-action="ContactsViewerOnly">Контакти</a>
+                                <a class="@NavClass("", "Home", "ContactsViewerOnly")" asp-area="" asp-controller="Home" asp-action="ContactsViewerOnly">Контакти</a>
                             </li>
                         }
                         else if (User.IsInRole("Student"))
                         {
                             <li class="nav-item">
-                                <a class="@NavClass("", "Student", "Profile")" asp-controller="Student" asp-action="Profile">Профил</a>
+                                <a class="@NavClass("", "Student", "Profile")" asp-area="" asp-controller="Student" asp-action="Profile">Профил</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Student", "EditProfile")" asp-controller="Student" asp-action="EditProfile">Редакция на профил</a>
+                                <a class="@NavClass("", "Student", "EditProfile")" asp-area="" asp-controller="Student" asp-action="EditProfile">Редакция на профил</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Student", "Messages")" asp-controller="Student" asp-action="Messages">Съобщения</a>
+                                <a class="@NavClass("", "Student", "Messages")" asp-area="" asp-controller="Student" asp-action="Messages">Съобщения</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Student", "Schedule")" asp-controller="Student" asp-action="Schedule">График</a>
+                                <a class="@NavClass("", "Student", "Schedule")" asp-area="" asp-controller="Student" asp-action="Schedule">График</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Student", "MyLessons")" asp-controller="Student" asp-action="MyLessons">Моите часове</a>
+                                <a class="@NavClass("", "Student", "MyLessons")" asp-area="" asp-controller="Student" asp-action="MyLessons">Моите часове</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Student", "TestResults")" asp-controller="Student" asp-action="TestResults">Тестове</a>
+                                <a class="@NavClass("", "Student", "TestResults")" asp-area="" asp-controller="Student" asp-action="TestResults">Тестове</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Student", "Instructors", "nav-link-accent")" asp-controller="Student" asp-action="Instructors">Запази час</a>
+                                <a class="@NavClass("", "Student", "Instructors", "nav-link-accent")" asp-area="" asp-controller="Student" asp-action="Instructors">Запази час</a>
                             </li>
                         }
                         else if (User.IsInRole("Instructor"))
                         {
                             <li class="nav-item">
-                                <a class="@NavClass("", "Instructor", "Profile")" asp-controller="Instructor" asp-action="Profile">Профил</a>
+                                <a class="@NavClass("", "Instructor", "Profile")" asp-area="" asp-controller="Instructor" asp-action="Profile">Профил</a>
                             </li>
                             /*<li class="nav-item">
-                                <a class="@NavClass("", "Instructor", "EditProfile")" asp-controller="Instructor" asp-action="EditProfile">Редактирай профил</a>
+                                <a class="@NavClass("", "Instructor", "EditProfile")" asp-area="" asp-controller="Instructor" asp-action="EditProfile">Редакция на профил</a>
                             </li>*/
                             <li class="nav-item">
-                                <a class="@NavClass("", "Instructor", "Messages")" asp-controller="Instructor" asp-action="Messages">Съобщения</a>
+                                <a class="@NavClass("", "Instructor", "Create")" asp-area="" asp-controller="Instructor" asp-action="Create">Създай свободен слот</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Instructor", "Create")" asp-controller="Instructor" asp-action="Create">Създай свободен слот</a>
+                                <a class="@NavClass("", "Instructor", "PendingLessons")" asp-area="" asp-controller="Instructor" asp-action="PendingLessons">Заявки за час</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Instructor", "PendingLessons")" asp-controller="Instructor" asp-action="PendingLessons">Заявки</a>
+                                <a class="@NavClass("", "Instructor", "Schedule")" asp-area="" asp-controller="Instructor" asp-action="Schedule">График</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Instructor", "Schedule")" asp-controller="Instructor" asp-action="Schedule">График</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="@NavClass("", "Instructor", "MyStudents")" asp-controller="Instructor" asp-action="MyStudents">Курсисти</a>
+                                <a class="@NavClass("", "Instructor", "MyStudents")" asp-area="" asp-controller="Instructor" asp-action="MyStudents">Курсисти</a>
                             </li>
                         }
-
                         else if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
                                 <a class="@NavClass("Admin", "Dashboard", "Index", "nav-link-accent")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Админ панел</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "Index")" asp-controller="Home" asp-action="Index">Начало</a>
+                                <a class="@NavClass("", "Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Начало</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "Index")" asp-controller="Home" asp-action="Index">Начало</a>
+                                <a class="@NavClass("", "Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Начало</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "Courses")" asp-controller="Home" asp-action="Courses">Курсове</a>
+                                <a class="@NavClass("", "Home", "Courses")" asp-area="" asp-controller="Home" asp-action="Courses">Курсове</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "Conditions")" asp-controller="Home" asp-action="Conditions">Условия</a>
+                                <a class="@NavClass("", "Home", "Conditions")" asp-area="" asp-controller="Home" asp-action="Conditions">Условия</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "Contacts")" asp-controller="Home" asp-action="Contacts">Контакти</a>
+                                <a class="@NavClass("", "Home", "Contacts")" asp-area="" asp-controller="Home" asp-action="Contacts">Контакти</a>
                             </li>
                             <li class="nav-item">
-                                <a class="@NavClass("", "Home", "Apply", "nav-link-accent")" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
+                                <a class="@NavClass("", "Home", "Apply", "nav-link-accent")" asp-area="" asp-controller="Home" asp-action="Apply">Заявка за записване</a>
                             </li>
                         }
                     </ul>

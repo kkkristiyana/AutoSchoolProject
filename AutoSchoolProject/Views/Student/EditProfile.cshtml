@@ -7,6 +7,11 @@
 
 <h2 class="mb-3">✏️ Редакция на профил</h2>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
@@ -17,7 +22,7 @@
 
     <div class="mb-3">
         <label class="form-label">Профилна снимка</label>
-        <div class="file-picker d-flex align-items-center gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-3">
             @if (hasImg)
             {
                 <img src="@Model.CurrentProfileImagePath" alt="Профилна" style="width:72px;height:72px;object-fit:cover;border-radius:50%;" />
@@ -27,11 +32,23 @@
                 <div style="width:72px;height:72px;border-radius:50%;background:#e9ecef;"></div>
             }
 
-            <input asp-for="ProfileImage" type="file" id="studentProfileImage" class="d-none js-bulgarian-file-input" accept="image/*" />
-            <label for="studentProfileImage" class="btn btn-outline-secondary mb-0">Избери файл</label>
-            <span class="small text-muted js-file-name">Няма избран файл</span>
+            <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*" />
         </div>
+
         <span asp-validation-for="ProfileImage" class="text-danger"></span>
+
+        @if (hasImg)
+        {
+            <div class="mt-2">
+                <button type="submit"
+                        formmethod="post"
+                        formnovalidate
+                        formaction="@Url.Action("ResetProfileImage", "Student")"
+                        class="btn btn-outline-danger btn-sm">
+                    Нулирай профилната снимка
+                </button>
+            </div>
+        }
     </div>
 
     <div class="mb-3">

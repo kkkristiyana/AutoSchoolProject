@@ -128,6 +128,27 @@ public class StudentController : Controller
         TempData["Success"] = "Профилът е обновен.";
         return RedirectToAction(nameof(Profile));
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetProfileImage()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await _context.Users.FindAsync(userId);
+
+        if (user != null && !string.IsNullOrWhiteSpace(user.ProfileImagePath))
+        {
+            await _fileStorage.DeleteImageAsync(user.ProfileImagePath);
+            user.ProfileImagePath = null;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Профилната снимка беше нулирана.";
+        }
+        else
+        {
+            TempData["Error"] = "Нямаш зададена профилна снимка за нулиране.";
+        }
+
+        return RedirectToAction(nameof(EditProfile));
+    }
 
     public async Task<IActionResult> Instructors()
     {

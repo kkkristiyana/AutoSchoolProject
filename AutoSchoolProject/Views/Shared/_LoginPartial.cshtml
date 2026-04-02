@@ -10,13 +10,13 @@
         <li class="nav-item">
             @if (User.IsInRole("Student"))
             {
-                <a class="nav-link nav-user-link" asp-controller="Student" asp-action="Profile">
+                <a class="nav-link nav-user-link" asp-area="" asp-controller="Student" asp-action="Profile">
                     Здравей, @User.Identity?.Name
                 </a>
             }
             else if (User.IsInRole("Instructor"))
             {
-                <a class="nav-link nav-user-link" asp-controller="Instructor" asp-action="Profile">
+                <a class="nav-link nav-user-link" asp-area="" asp-controller="Instructor" asp-action="Profile">
                     Здравей, @User.Identity?.Name
                 </a>
             }

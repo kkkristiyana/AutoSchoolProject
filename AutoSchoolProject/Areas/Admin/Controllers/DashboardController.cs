@@ -1,7 +1,10 @@
 ﻿using AutoSchoolProject.Data;
+using AutoSchoolProject.Models;
 using AutoSchoolProject.Models.Enums;
+using AutoSchoolProject.Services.Interfaces;
 using AutoSchoolProject.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,15 +15,23 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IFileStorageService _fileStorage;
 
-        public DashboardController(ApplicationDbContext context)
+        public DashboardController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            IFileStorageService fileStorage)
         {
             _context = context;
+            _userManager = userManager;
+            _fileStorage = fileStorage;
         }
 
         public async Task<IActionResult> Index()
         {
             var now = DateTime.Now;
+            var currentUser = await _userManager.GetUserAsync(User);
 
             var vm = new DashboardViewModel
             {
@@ -30,6 +41,7 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 PendingLessons = await _context.PracticeLessons.CountAsync(l => l.Status == LessonStatus.Pending),
                 ApprovedUpcomingLessons = await _context.PracticeLessons.CountAsync(l => l.Status == LessonStatus.Approved && l.DateTime >= now),
                 CompletedLessons = await _context.PracticeLessons.CountAsync(l => l.Completed),
+                //CurrentProfileImagePath = currentUser?.ProfileImagePath,
                 LatestLessons = await _context.PracticeLessons
                     .Include(l => l.Student).ThenInclude(s => s.User)
                     .Include(l => l.Instructor).ThenInclude(i => i.User)
@@ -49,5 +61,7 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             return View(vm);
         }
+
+        
     }
 }

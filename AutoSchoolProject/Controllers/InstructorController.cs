@@ -109,6 +109,28 @@ namespace AutoSchoolProject.Controllers
             TempData["Success"] = "Профилът беше обновен успешно.";
             return RedirectToAction(nameof(Profile));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetProfileImage()
+        {
+            var instructor = await GetCurrentInstructorAsync();
+            SetInstructorContext(instructor);
+
+            if (!string.IsNullOrWhiteSpace(instructor.User.ProfileImagePath))
+            {
+                await _fileStorage.DeleteImageAsync(instructor.User.ProfileImagePath);
+                instructor.User.ProfileImagePath = null;
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Профилната снимка беше нулирана.";
+            }
+            else
+            {
+                TempData["Error"] = "Нямаш зададена профилна снимка за нулиране.";
+            }
+
+            return RedirectToAction(nameof(EditProfile));
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> Create()

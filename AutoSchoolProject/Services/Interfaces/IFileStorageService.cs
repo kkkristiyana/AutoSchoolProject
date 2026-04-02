@@ -5,6 +5,6 @@ namespace AutoSchoolProject.Services.Interfaces
     public interface IFileStorageService
     {
         Task<string> SaveImageAsync(IFormFile file, string folder, string? oldRelativePath = null);
+        Task DeleteImageAsync(string? relativePath);
     }
 }
-
