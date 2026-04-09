@@ -46,6 +46,8 @@ namespace AutoSchoolProject.Data
 
             foreach (var instructor in instructors)
             {
+                instructor.IsWorking = "Yes";
+
                 var email = instructor.User.Email ?? string.Empty;
                 if (instructorCourseMap.TryGetValue(email, out var config))
                 {
@@ -72,6 +74,8 @@ namespace AutoSchoolProject.Data
 
             foreach (var student in students)
             {
+                student.StillStudying = "Yes";
+
                 var email = student.User.Email ?? string.Empty;
                 if (studentCourseMap.TryGetValue(email, out var courseId))
                 {

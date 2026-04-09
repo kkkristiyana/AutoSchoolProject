@@ -91,10 +91,18 @@ namespace AutoSchoolProject.Data
                     await userManager.AddToRoleAsync(user, "Instructor");
                 }
 
-                var exists = await context.Instructors.AnyAsync(i => i.UserId == user.Id);
-                if (!exists)
+                var instructor = await context.Instructors.FirstOrDefaultAsync(i => i.UserId == user.Id);
+                if (instructor == null)
                 {
-                    context.Instructors.Add(new Instructor { UserId = user.Id });
+                    context.Instructors.Add(new Instructor
+                    {
+                        UserId = user.Id,
+                        IsWorking = "Yes"
+                    });
+                }
+                else if (string.IsNullOrWhiteSpace(instructor.IsWorking))
+                {
+                    instructor.IsWorking = "Yes";
                 }
             }
         }
@@ -140,10 +148,18 @@ namespace AutoSchoolProject.Data
                     await userManager.AddToRoleAsync(user, "Student");
                 }
 
-                var exists = await context.Students.AnyAsync(s => s.UserId == user.Id);
-                if (!exists)
+                var student = await context.Students.FirstOrDefaultAsync(s => s.UserId == user.Id);
+                if (student == null)
                 {
-                    context.Students.Add(new Student { UserId = user.Id });
+                    context.Students.Add(new Student
+                    {
+                        UserId = user.Id,
+                        StillStudying = "Yes"
+                    });
+                }
+                else if (string.IsNullOrWhiteSpace(student.StillStudying))
+                {
+                    student.StillStudying = "Yes";
                 }
             }
         }

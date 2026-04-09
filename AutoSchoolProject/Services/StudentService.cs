@@ -94,6 +94,7 @@ namespace AutoSchoolProject.Services
             return await _context.Instructors
                 .Include(i => i.User)
                 .Include(i => i.Course)
+                .Where(i => i.IsWorking == "Yes")
                 .OrderBy(i => i.User.FirstName)
                 .ThenBy(i => i.User.LastName)
                 .Select(i => new InstructorListViewModel
@@ -108,9 +109,15 @@ namespace AutoSchoolProject.Services
                 .ToListAsync();
         }
 
+
         public async Task<List<InstructorListViewModel>> GetInstructorsAsync(ClaimsPrincipal user)
         {
             var student = await GetStudentAsync(user);
+
+            if (!string.Equals(student.StillStudying, "Yes", StringComparison.OrdinalIgnoreCase))
+            {
+                return new List<InstructorListViewModel>();
+            }
 
             if (!student.CourseId.HasValue)
             {
@@ -120,7 +127,7 @@ namespace AutoSchoolProject.Services
             return await _context.Instructors
                 .Include(i => i.User)
                 .Include(i => i.Course)
-                .Where(i => i.CourseId == student.CourseId)
+                .Where(i => i.CourseId == student.CourseId && i.IsWorking == "Yes")
                 .OrderBy(i => i.User.FirstName)
                 .ThenBy(i => i.User.LastName)
                 .Select(i => new InstructorListViewModel
@@ -134,6 +141,7 @@ namespace AutoSchoolProject.Services
                 })
                 .ToListAsync();
         }
+
 
         public async Task<InstructorDetailsViewModel> GetInstructorDetailsAsync(int instructorId)
         {
@@ -165,9 +173,9 @@ namespace AutoSchoolProject.Services
             }
 
             var instructor = await _context.Instructors
-                .Include(i => i.User)
-                .Include(i => i.Course)
-                .FirstOrDefaultAsync(i => i.Id == instructorId && i.CourseId == student.CourseId);
+            .Include(i => i.User)
+            .Include(i => i.Course)
+            .FirstOrDefaultAsync(i => i.Id == instructorId && i.CourseId == student.CourseId && i.IsWorking == "Yes");
 
             if (instructor == null)
             {
@@ -191,15 +199,21 @@ namespace AutoSchoolProject.Services
         {
             var student = await GetStudentAsync(user);
 
+            if (!string.Equals(student.StillStudying, "Yes", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Твоят профил вече не е отбелязан като активен курсист.");
+            }
+
             if (!student.CourseId.HasValue)
             {
                 throw new InvalidOperationException("Все още нямаш зададена категория от администратор.");
             }
 
             var instructor = await _context.Instructors
-                .Include(i => i.User)
-                .Include(i => i.Course)
-                .FirstOrDefaultAsync(i => i.Id == instructorId && i.CourseId == student.CourseId);
+            .Include(i => i.User)
+            .Include(i => i.Course)
+            .FirstOrDefaultAsync(i => i.Id == instructorId && i.CourseId == student.CourseId && i.IsWorking == "Yes");
+
 
             if (instructor == null)
             {
@@ -237,18 +251,26 @@ namespace AutoSchoolProject.Services
         {
             var student = await GetStudentAsync(user);
 
+            if (!string.Equals(student.StillStudying, "Yes", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Твоят профил вече не е отбелязан като активен курсист.");
+            }
+
             if (!student.CourseId.HasValue)
             {
                 throw new InvalidOperationException("Все още нямаш зададена категория от администратор.");
             }
 
             var slot = await _context.PracticeLessons
-                .Include(l => l.Instructor)
-                .FirstOrDefaultAsync(l =>
-                    l.Id == model.SlotId &&
-                    l.InstructorId == model.InstructorId &&
-                    l.StudentId == null &&
-                    l.Status == LessonStatus.Available);
+            .Include(l => l.Instructor)
+            .FirstOrDefaultAsync(l =>
+                l.Id == model.SlotId &&
+                l.InstructorId == model.InstructorId &&
+                l.StudentId == null &&
+                l.Status == LessonStatus.Available &&
+                l.Instructor != null &&
+                l.Instructor.IsWorking == "Yes");
+
 
             if (slot == null)
             {

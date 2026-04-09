@@ -35,13 +35,14 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             var vm = new DashboardViewModel
             {
-                TotalStudents = await _context.Students.CountAsync(),
-                TotalInstructors = await _context.Instructors.CountAsync(),
+                ActiveStudents = await _context.Students.CountAsync(s => s.StillStudying == "Yes"),
+                FinishedStudents = await _context.Students.CountAsync(s => s.StillStudying == "No"),
+                ActiveInstructors = await _context.Instructors.CountAsync(i => i.IsWorking == "Yes"),
+                InactiveInstructors = await _context.Instructors.CountAsync(i => i.IsWorking == "No"),
                 TotalLessons = await _context.PracticeLessons.CountAsync(),
                 PendingLessons = await _context.PracticeLessons.CountAsync(l => l.Status == LessonStatus.Pending),
                 ApprovedUpcomingLessons = await _context.PracticeLessons.CountAsync(l => l.Status == LessonStatus.Approved && l.DateTime >= now),
                 CompletedLessons = await _context.PracticeLessons.CountAsync(l => l.Completed),
-                //CurrentProfileImagePath = currentUser?.ProfileImagePath,
                 LatestLessons = await _context.PracticeLessons
                     .Include(l => l.Student).ThenInclude(s => s.User)
                     .Include(l => l.Instructor).ThenInclude(i => i.User)
@@ -51,8 +52,8 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                     {
                         Id = l.Id,
                         DateTime = l.DateTime,
-                        StudentName = l.Student != null ? (l.Student.User.FirstName + " " + l.Student.User.LastName) : null,
-                        InstructorName = l.Instructor != null ? (l.Instructor.User.FirstName + " " + l.Instructor.User.LastName) : null,
+                        StudentName = l.Student != null ? ((l.Student.User.FirstName ?? string.Empty) + " " + (l.Student.User.LastName ?? string.Empty)).Trim() : null,
+                        InstructorName = l.Instructor != null ? ((l.Instructor.User.FirstName ?? string.Empty) + " " + (l.Instructor.User.LastName ?? string.Empty)).Trim() : null,
                         Status = l.Status.ToString(),
                         Completed = l.Completed
                     })
@@ -61,7 +62,5 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             return View(vm);
         }
-
-        
     }
 }

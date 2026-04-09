@@ -235,7 +235,8 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                         student = new Student
                         {
                             UserId = user.Id,
-                            CourseId = req.CourseId
+                            CourseId = req.CourseId,
+                            StillStudying = "Yes"
                         };
                         _context.Students.Add(student);
                     }
@@ -252,7 +253,8 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                         instructor = new Instructor
                         {
                             UserId = user.Id,
-                            CourseId = req.CourseId
+                            CourseId = req.CourseId,
+                            IsWorking = "Yes"
                         };
                         _context.Instructors.Add(instructor);
                     }

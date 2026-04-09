@@ -5,20 +5,24 @@
 
 <h2 class="mb-3">Админ табло</h2>
 
-
 <div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card"><div class="card-body">Ученици: <strong>@Model.TotalStudents</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">Инструктори: <strong>@Model.TotalInstructors</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">Часове общо: <strong>@Model.TotalLessons</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">Чакащи заявки за час: <strong>@Model.PendingLessons</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">Одобрени предстоящи часове: <strong>@Model.ApprovedUpcomingLessons</strong></div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">Проведени часове: <strong>@Model.CompletedLessons</strong></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">Активни курсисти: <strong>@Model.ActiveStudents</strong></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">Завършили / прекъснали: <strong>@Model.FinishedStudents</strong></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">Активни инструктори: <strong>@Model.ActiveInstructors</strong></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">Извън длъжност: <strong>@Model.InactiveInstructors</strong></div></div></div>
+
+    <div class="col-md-3"><div class="card"><div class="card-body">Часове общо: <strong>@Model.TotalLessons</strong></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">Чакащи заявки за час: <strong>@Model.PendingLessons</strong></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">Одобрени предстоящи часове: <strong>@Model.ApprovedUpcomingLessons</strong></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">Проведени часове: <strong>@Model.CompletedLessons</strong></div></div></div>
 </div>
 
 <div class="d-flex gap-2 flex-wrap mb-4">
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Lessons" asp-action="Index">Часове</a>
-    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Students" asp-action="Index">Ученици</a>
-    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Instructors" asp-action="Index">Инструктори</a>
+    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Students" asp-action="Index">Активни курсисти</a>
+    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Students" asp-action="Finished">Завършили / прекъснали</a>
+    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Instructors" asp-action="Index">Активни инструктори</a>
+    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Instructors" asp-action="Inactive">Извън длъжност</a>
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Requests" asp-action="Index">Заявки</a>
     <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="Courses" asp-action="Index">Курсове</a>
 </div>

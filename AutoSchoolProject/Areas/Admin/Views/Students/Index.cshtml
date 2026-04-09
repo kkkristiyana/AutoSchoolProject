@@ -1,14 +1,26 @@
 ﻿@model List<StudentRowViewModel>
 @{
-    ViewData["Title"] = "Ученици";
+    ViewData["Title"] = "Активни курсисти";
 }
 
-<h2 class="mb-3">Ученици</h2>
+<h2 class="mb-3">Активни курсисти</h2>
 
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="d-flex gap-2 flex-wrap mb-3">
+    <a class="btn btn-outline-primary"
+       asp-area="Admin" asp-controller="Students" asp-action="Finished">Завършили / прекъснали</a>
+    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+       class="btn btn-outline-secondary">← Към админ таблото</a>
+</div>
 
 <table class="table table-striped align-middle">
     <thead>
@@ -41,14 +53,19 @@
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-primary"
                        asp-area="Admin" asp-controller="Students" asp-action="Edit" asp-route-id="@s.Id">Редакция</a>
+
                     <a class="btn btn-sm btn-primary"
                        asp-area="Admin" asp-controller="StudentPanel" asp-action="Profile" asp-route-studentId="@s.Id">Панел на курсиста</a>
+
+                    <form asp-area="Admin" asp-controller="Students" asp-action="MarkAsFinished" asp-route-id="@s.Id"
+                          method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            Завършил / Прекъснал
+                        </button>
+                    </form>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-<a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
-   class="btn btn-sm btn-outline-secondary mb-3">
-    ← Към админ таблото
-</a>

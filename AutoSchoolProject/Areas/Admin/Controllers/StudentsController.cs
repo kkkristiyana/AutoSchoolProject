@@ -26,20 +26,93 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             var students = await _context.Students
                 .Include(s => s.User)
                 .Include(s => s.Course)
+                .Where(s => s.StillStudying == "Yes")
                 .Select(s => new StudentRowViewModel
                 {
                     Id = s.Id,
-                    FullName = s.User.FirstName + " " + s.User.LastName,
+                    FullName = ((s.User.FirstName ?? string.Empty) + " " + (s.User.LastName ?? string.Empty)).Trim(),
                     Email = s.User.Email,
                     PhoneNumber = s.User.PhoneNumber,
                     CourseName = s.Course != null ? s.Course.Name : null,
                     LessonsCount = _context.PracticeLessons.Count(l => l.StudentId == s.Id),
-                    ProfileImagePath = s.User.ProfileImagePath
+                    ProfileImagePath = s.User.ProfileImagePath,
+                    StillStudying = s.StillStudying
                 })
                 .OrderBy(s => s.FullName)
                 .ToListAsync();
 
             return View(students);
+        }
+
+        public async Task<IActionResult> Finished()
+        {
+            var students = await _context.Students
+                .Include(s => s.User)
+                .Include(s => s.Course)
+                .Where(s => s.StillStudying == "No")
+                .Select(s => new StudentRowViewModel
+                {
+                    Id = s.Id,
+                    FullName = ((s.User.FirstName ?? string.Empty) + " " + (s.User.LastName ?? string.Empty)).Trim(),
+                    Email = s.User.Email,
+                    PhoneNumber = s.User.PhoneNumber,
+                    CourseName = s.Course != null ? s.Course.Name : null,
+                    LessonsCount = _context.PracticeLessons.Count(l => l.StudentId == s.Id),
+                    ProfileImagePath = s.User.ProfileImagePath,
+                    StillStudying = s.StillStudying
+                })
+                .OrderBy(s => s.FullName)
+                .ToListAsync();
+
+            return View(students);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsFinished(int id)
+        {
+            var student = await _context.Students
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            if (student.StillStudying == "No")
+            {
+                TempData["Error"] = "Този курсист вече е преместен при завършилите / прекъсналите.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            student.StillStudying = "No";
+            await _context.SaveChangesAsync();
+
+            var fullName = ((student.User.FirstName ?? string.Empty) + " " + (student.User.LastName ?? string.Empty)).Trim();
+            TempData["Success"] = $"Курсистът {fullName} беше преместен при завършилите / прекъсналите.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsStudying(int id)
+        {
+            var student = await _context.Students
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            student.StillStudying = "Yes";
+            await _context.SaveChangesAsync();
+
+            var fullName = ((student.User.FirstName ?? string.Empty) + " " + (student.User.LastName ?? string.Empty)).Trim();
+            TempData["Success"] = $"Курсистът {fullName} беше върнат в активните курсисти.";
+            return RedirectToAction(nameof(Finished));
         }
 
         [HttpGet]
@@ -50,6 +123,12 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (student == null) return NotFound();
+
+            if (student.StillStudying == "No")
+            {
+                TempData["Error"] = "Този курсист е в списъка Завършили / прекъснали. Върни го в активните, ако искаш да го редактираш.";
+                return RedirectToAction(nameof(Finished));
+            }
 
             var courses = await _context.Courses
                 .AsNoTracking()
@@ -86,6 +165,12 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (student == null) return NotFound();
+
+            if (student.StillStudying == "No")
+            {
+                TempData["Error"] = "Този курсист е в списъка Завършили / прекъснали. Върни го в активните, ако искаш да го редактираш.";
+                return RedirectToAction(nameof(Finished));
+            }
 
             if (!ModelState.IsValid)
             {

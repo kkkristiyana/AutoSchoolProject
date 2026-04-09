@@ -1,4 +1,7 @@
-﻿namespace AutoSchoolProject.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AutoSchoolProject.Models
 {
     public class Instructor
     {
@@ -9,6 +12,11 @@
 
         public int? CourseId { get; set; }
         public Course? Course { get; set; }
+
+        [Required]
+        [MaxLength(3)]
+        [Column("Is working")]
+        public string IsWorking { get; set; } = "Yes";
 
         public string? CarModel { get; set; }
         public string? CarImagePath { get; set; }

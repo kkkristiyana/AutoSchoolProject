@@ -29,10 +29,11 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
             var instructors = await _context.Instructors
                 .Include(i => i.User)
                 .Include(i => i.Course)
+                .Where(i => i.IsWorking == "Yes")
                 .Select(i => new InstructorRowViewModel
                 {
                     Id = i.Id,
-                    FullName = i.User.FirstName + " " + i.User.LastName,
+                    FullName = ((i.User.FirstName ?? string.Empty) + " " + (i.User.LastName ?? string.Empty)).Trim(),
                     Email = i.User.Email,
                     PhoneNumber = i.User.PhoneNumber,
                     CourseName = i.Course != null ? i.Course.Name : null,
@@ -41,12 +42,90 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                         l.Status == LessonStatus.Approved &&
                         l.DateTime >= now),
                     ProfileImagePath = i.User.ProfileImagePath,
-                    CarImagePath = i.CarImagePath
+                    CarImagePath = i.CarImagePath,
+                    IsWorking = i.IsWorking
                 })
                 .OrderBy(i => i.FullName)
                 .ToListAsync();
 
             return View(instructors);
+        }
+
+        public async Task<IActionResult> Inactive()
+        {
+            var now = DateTime.Now;
+
+            var instructors = await _context.Instructors
+                .Include(i => i.User)
+                .Include(i => i.Course)
+                .Where(i => i.IsWorking == "No")
+                .Select(i => new InstructorRowViewModel
+                {
+                    Id = i.Id,
+                    FullName = ((i.User.FirstName ?? string.Empty) + " " + (i.User.LastName ?? string.Empty)).Trim(),
+                    Email = i.User.Email,
+                    PhoneNumber = i.User.PhoneNumber,
+                    CourseName = i.Course != null ? i.Course.Name : null,
+                    UpcomingApprovedLessons = _context.PracticeLessons.Count(l =>
+                        l.InstructorId == i.Id &&
+                        l.Status == LessonStatus.Approved &&
+                        l.DateTime >= now),
+                    ProfileImagePath = i.User.ProfileImagePath,
+                    CarImagePath = i.CarImagePath,
+                    IsWorking = i.IsWorking
+                })
+                .OrderBy(i => i.FullName)
+                .ToListAsync();
+
+            return View(instructors);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsNotWorking(int id)
+        {
+            var instructor = await _context.Instructors
+                .Include(i => i.User)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (instructor == null)
+            {
+                return NotFound();
+            }
+
+            if (instructor.IsWorking == "No")
+            {
+                TempData["Error"] = "Този инструктор вече е в списъка Извън длъжност.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            instructor.IsWorking = "No";
+            await _context.SaveChangesAsync();
+
+            var fullName = ((instructor.User.FirstName ?? string.Empty) + " " + (instructor.User.LastName ?? string.Empty)).Trim();
+            TempData["Success"] = $"Инструкторът {fullName} беше преместен в списъка Извън длъжност.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsWorking(int id)
+        {
+            var instructor = await _context.Instructors
+                .Include(i => i.User)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (instructor == null)
+            {
+                return NotFound();
+            }
+
+            instructor.IsWorking = "Yes";
+            await _context.SaveChangesAsync();
+
+            var fullName = ((instructor.User.FirstName ?? string.Empty) + " " + (instructor.User.LastName ?? string.Empty)).Trim();
+            TempData["Success"] = $"Инструкторът {fullName} беше върнат в активните инструктори.";
+            return RedirectToAction(nameof(Inactive));
         }
 
         [HttpGet]
@@ -57,6 +136,12 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 .FirstOrDefaultAsync(i => i.Id == id);
 
             if (instructor == null) return NotFound();
+
+            if (instructor.IsWorking == "No")
+            {
+                TempData["Error"] = "Този инструктор е в списъка Извън длъжност. Върни го на длъжност, ако искаш да го редактираш.";
+                return RedirectToAction(nameof(Inactive));
+            }
 
             var courses = await _context.Courses
                 .AsNoTracking()
@@ -95,6 +180,12 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
                 .FirstOrDefaultAsync(i => i.Id == id);
 
             if (instructor == null) return NotFound();
+
+            if (instructor.IsWorking == "No")
+            {
+                TempData["Error"] = "Този инструктор е в списъка Извън длъжност. Върни го на длъжност, ако искаш да го редактираш.";
+                return RedirectToAction(nameof(Inactive));
+            }
 
             if (!ModelState.IsValid)
             {

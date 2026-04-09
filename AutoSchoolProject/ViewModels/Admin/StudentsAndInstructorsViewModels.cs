@@ -9,6 +9,7 @@
         public string? CourseName { get; set; }
         public int LessonsCount { get; set; }
         public string? ProfileImagePath { get; set; }
+        public string StillStudying { get; set; } = "Yes";
     }
 
     public class InstructorRowViewModel
@@ -21,5 +22,6 @@
         public int UpcomingApprovedLessons { get; set; }
         public string? ProfileImagePath { get; set; }
         public string? CarImagePath { get; set; }
+        public string IsWorking { get; set; } = "Yes";
     }
 }

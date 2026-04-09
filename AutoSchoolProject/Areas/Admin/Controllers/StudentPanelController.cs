@@ -27,9 +27,11 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
         public async Task<IActionResult> Index(string? q)
         {
             var query = _context.Students
-                .Include(s => s.User)
-                .Include(s => s.Course)
-                .AsQueryable();
+            .Include(s => s.User)
+            .Include(s => s.Course)
+            .Where(s => s.StillStudying == "Yes")
+            .AsQueryable();
+
 
             if (!string.IsNullOrWhiteSpace(q))
             {
