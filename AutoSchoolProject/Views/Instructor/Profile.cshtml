@@ -30,7 +30,7 @@
                     <p class="mb-1"><strong>Имейл:</strong> @Model.Email</p>
                     <p class="mb-1"><strong>Телефон:</strong> @Model.PhoneNumber</p>
                     <p class="mb-1"><strong>Категория:</strong> @Model.CourseName</p>
-                    <p class="mb-0"><strong>Автомобил:</strong> @(string.IsNullOrWhiteSpace(Model.CarModel) ? "Няма въведен автомобил" : Model.CarModel)</p>
+                    <p class="mb-0"><strong>Превозно средство:</strong> @(string.IsNullOrWhiteSpace(Model.CarModel) ? "Няма въведен автомобил" : Model.CarModel)</p>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
 {
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title mb-3">Снимка на автомобила</h5>
+            <h5 class="card-title mb-3">Снимка на превозното средство</h5>
             <img src="@Model.CarImagePath" alt="Снимка на автомобила" style="max-width:100%;max-height:280px;object-fit:cover;border-radius:16px;" />
         </div>
     </div>
