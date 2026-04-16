@@ -1,7 +1,7 @@
 ﻿@model AutoSchoolProject.ViewModels.Admin.InstructorPanelLessonsViewModel
 @{
     ViewData["Title"] = "Часове";
-    int instructorId = ViewBag.InstructorId is int v ? v : 0;
+    int instructorId = Model.InstructorId;
 
     string StatusBg(string? status) => status switch
     {
@@ -39,7 +39,9 @@
 }
 
 <div class="card shadow-sm p-3 mb-3">
-    <form method="get" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Lessons" asp-route-instructorId="@instructorId" class="row g-3 align-items-end">
+    <form method="get" asp-area="Admin" asp-controller="InstructorPanel" asp-action="Lessons" class="row g-3 align-items-end">
+        <input type="hidden" name="instructorId" value="@Model.InstructorId" />
+
         <div class="col-md-4">
             <label class="form-label">Филтър по статус</label>
             <select name="status" class="form-select">
@@ -51,6 +53,7 @@
                 <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Отменени</option>
             </select>
         </div>
+
         <div class="col-md-3 d-grid">
             <button class="btn btn-primary" type="submit">Приложи</button>
         </div>

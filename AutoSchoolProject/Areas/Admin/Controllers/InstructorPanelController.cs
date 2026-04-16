@@ -225,6 +225,7 @@ namespace AutoSchoolProject.Areas.Admin.Controllers
 
             return View(new InstructorPanelLessonsViewModel
             {
+                InstructorId = instructorId,
                 Status = status,
                 Lessons = lessons
             });

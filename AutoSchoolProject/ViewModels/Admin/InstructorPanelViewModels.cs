@@ -36,6 +36,7 @@ namespace AutoSchoolProject.ViewModels.Admin
 
     public class InstructorPanelLessonsViewModel
     {
+        public int InstructorId { get; set; }
         public string? Status { get; set; }
         public List<InstructorPanelLessonRowViewModel> Lessons { get; set; } = new();
     }
