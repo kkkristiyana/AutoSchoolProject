@@ -48,8 +48,8 @@ namespace AutoSchoolProject.Data
                 Email = email,
                 EmailConfirmed = true,
                 FirstName = "Администратор",
-                LastName = "Маринов",
-                PhoneNumber = "+359888100100"
+                LastName = "Николова",
+                PhoneNumber = "+359897557325"
             };
 
             await userManager.CreateAsync(admin, "Admin123!");
