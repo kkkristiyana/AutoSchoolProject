@@ -99,9 +99,9 @@ dotnet run
 ## Примерни потребителски данни за използване при тестване
 
 1. Потребителска роля: Нерегистриран посетител; e-mail: - ; парола: -
-2. Потребителска роля: Курсист; e-mail: petya.atanasova@student.bg; парола: Student123!
-3. Потребителска роля: Инструктор; e-mail: georgi.iliev@autoschool.bg; парола: Instructor123!
-4. Потребителска роля: Админ; e-mail: admin@school.local; парола: Admin123!
+2. Потребителска роля: Курсист; e-mail: "petya.atanasova@student.bg"; парола: Student123!
+3. Потребителска роля: Инструктор; e-mail: "georgi.iliev@autoschool.bg"; парола: Instructor123!
+4. Потребителска роля: Админ; e-mail: "admin@school.local"; парола: Admin123!
 
 ## Потребителски роли
 
